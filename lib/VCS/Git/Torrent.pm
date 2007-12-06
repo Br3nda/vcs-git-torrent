@@ -54,7 +54,25 @@ repository can make things slower than cold Subversion.  It would be
 nice, if there are nearby mirror servers or other people sharing their
 connection, to get revisions from there instead.
 
+=head1 IMPLEMENTATION STATUS
 
+Based on an initial set of milestones for a summer of code student.
+
+  - tracker protocol
+  - p2p protocol decoding library
+  - git repository access library - cat-file and object traversal
+  - p2p handshake and peer discovery
+  - p2p "references" message
+  - git repository access enhancement - arbitrary packfile generation
+  - p2p "request" message (and "play" response)
+  - p2p "stop" request
+  - p2p "reels" request and response
+  - commit reel sorting algorithm
+  - storing and accessing commit reel indexes
+  - p2p "scan" request and response
+  - p2p "play" and "blocks" messages
+  - git repository access enhancement - "thin" packfiles according to
+    commit reel sorting algorithm
 
 =cut
 
