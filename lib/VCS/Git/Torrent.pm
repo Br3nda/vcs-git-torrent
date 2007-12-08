@@ -5,31 +5,48 @@ VCS::Git::Torrent - distributed version control swarm
 
 =head1 SYNOPSIS
 
- my $torrent = VCS::Git::Torrent->new
+ use VCS::Git::Torrent qw(make_torrent);
+
+ # to make a torrent
+ my $torrent = make_torrent
      ( comment => $comment,
-       repo    => { alternates  => [ $other_torrent->repo_hash ],
-                    description => "My branches",
-                    pubkey      => "0xdeadbeef",
-                  },
-       references => VCS::Git::Torrent::References->new ( ... ),
+       repo =>
+       { alternates => [ $other_torrent->repo_hash ],
+         description => "My branches",
+         pubkey      => "0xdeadbeef",
+       },
+       references => VCS::Git::Torrent::References->new
+               ( ... ),
        trackers   => [ URI->new(...), ... ],
-       # created_by, creation_date is generated for you
+       # created_by, creation_date generated for you
      );
 
- use IO::All;
- $torrent->meta_info > io("myproject.gittorrent");
+ print "repo hash is ".$torrent->repo_hash;
 
- print "repo hash is ".$torrent->repo_hash_hex;
+ # the repo hash is important; without it you may not join
+ # the same swarm.  making it a part of the filename isn't a
+ # bad idea.
+ my $filename = "myproject-GTP$short_hash.gittorrent";
+
+ # save it to disk
+ use IO::All;
+ my $short_hash = substr $torrent->repo_hash, 0, 7;
+ $torrent->contents > io($filename);
+
+ # load one from disk
+ $torrent = VCS::Git::Torrent->new
+         ( contents => scalar io($filename)->slurp );
 
  # connect to the repository.
  $torrent->repository(VCS::Git::Repository->new( ... ));
 
  # are all the refs present.  This checks all the ref targets are in
- # the file.
+ # the repository.
  print "we're a seeder" if $torrent->completed;
 
- # get ready...
- my $peer = VCS::Git::Torrent::Peer->new
+ # for starting a Coro-based peer
+ use VCS::Git::Torrent qw(start_peer_async);
+ my $peer = start_peer_async
                ( address => "git.example.com",  # optional
                  # peer_id is generated for you
                  port => 9419,                  # also optional
@@ -38,10 +55,9 @@ VCS::Git::Torrent - distributed version control swarm
                  down_rate => 0,
                  max_peers => 16,
                  torrents => [ $torrent ],
+                 peers => [ "IP:PORT", ... ],   # optional
                );
-
- # now go!
- $peer->run;
+ $peer->join;
 
 =head1 DESCRIPTION
 
