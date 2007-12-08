@@ -9,5 +9,6 @@ license         ("GPL3");
 requires        ("perl" => 5.008001);
 requires        ("Moose" => 0.32);
 requires        ("Sub::Exporter");
+requires        ("MooseX::Timestamp" => 0.01);
 
 &WriteAll;

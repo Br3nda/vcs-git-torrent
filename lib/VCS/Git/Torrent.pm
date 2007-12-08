@@ -114,6 +114,7 @@ Based on an initial set of milestones for a summer of code student.
 =cut
 
 use Moose::Util::TypeConstraints;
+use MooseX::TimestampTZ;
 
 use 5.008001;
 use utf8;
@@ -137,5 +138,81 @@ subtype 'VCS::Git::Torrent::port'
 	=> where {
 		($_&65535) && !($_>>16);
 	};
+
+subtype "VCS::Git::Torrent::sha1_hex"
+	=> as "Str"
+	=> where { length($_) == 40 and !m{[^0-9a-f]}i };
+
+subtype "VCS::Git::Torrent:git_object_id"
+	=> as "VCS::Git::Torrent::sha1_hex";
+
+subtype "VCS::Git::Torrent::repo_hash"
+	=> as "VCS::Git::Torrent::sha1_hex";
+
+use Moose;
+
+has 'comment' =>
+	isa => "Str",
+	is  => "rw";
+
+has 'created_by' =>
+	isa => "Str",
+	is  => "rw";
+
+has 'creation_date' =>
+	isa => "time_t",
+	is  => "ro";
+
+use VCS::Git::Torrent::Repo;
+
+has 'repo' =>
+	isa => "VCS::Git::Torrent::Repo",
+	required => 1,
+	is  => "ro";
+
+use Digest::SHA1 qw(sha1_hex);
+use Bencode qw(bencode);
+
+has 'repo_hash' =>
+	isa => "VCS::Git::Torrent::sha1_hex",
+	required => 1,
+	lazy => 1,
+	default => sub {
+		my $self = shift;
+		my $repo_hash = $self->repo->marshall;
+		sha1_hex(bencode($repo_hash));
+	};
+
+has 'references' =>
+	isa => "ArrayRef[VCS::Git::Torrent::Reference]",
+	required => 1,
+	is  => "rw";
+
+has 'trackers' =>
+	isa => "ArrayRef[URI]",
+	required => 1,
+	is  => "rw";
+
+sub marshall {
+	my $self = shift;
+
+	my %marshalled;
+	for my $key ( qw(comment created_by creation_date
+			 repo references trackers) ) {
+		if ( my $val = $self->$key ) {
+			$key =~ s{_}{ };
+			if ( blessed $val and
+			     $val->can("marshall") ) {
+				$val = $val->marshall;
+			}
+			$marshalled{$key} = $val;
+		}
+	}
+	\%marshalled;
+}
+
+sub contents {
+	my $self = shift;
+}
 
 1;
