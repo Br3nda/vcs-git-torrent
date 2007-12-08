@@ -1,4 +1,6 @@
 
+package VCS::Git::Torrent;
+
 =head1 NAME
 
 VCS::Git::Torrent - distributed version control swarm
@@ -110,5 +112,30 @@ Based on an initial set of milestones for a summer of code student.
   <http://www.gnu.org/licenses/>.
 
 =cut
+
+use Moose::Util::TypeConstraints;
+
+use 5.008001;
+use utf8;
+
+subtype 'VCS::Git::Torrent::peer_id'
+	=> as Str
+	=> where {
+		if (utf8::is_utf8($_)) {
+			my $x = $_;
+			utf8::encode($x);
+			length($x) == 20
+		}
+		else {
+			length($_) == 20;
+		}
+	};
+
+# following a candidate for inclusion in MooseX::Socket
+subtype 'VCS::Git::Torrent::port'
+	=> as Int
+	=> where {
+		($_&65535) && !($_>>16);
+	};
 
 1;
