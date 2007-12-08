@@ -1,0 +1,5 @@
+\.bak$
+~$
+MANIFEST.SKIP
+^.git
+^blib/

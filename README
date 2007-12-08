@@ -1,0 +1,25 @@
+README for VCS::Git::Torrent 0.01
+---------------------------------
+This module is intended to be a reference implementation of the
+GitTorrent Protocol version 0.1 (GTP/0.1).  It is still however
+incomplete.
+
+INSTALLATION
+------------
+To install this module, run the usual:
+
+  perl Makefile.PL
+  make
+  make test
+  sudo make install
+
+UNIX systems without 'sudo' typically respond to:
+
+  su root -c "make install"
+
+You can install most CPAN modules to your home directory, without sudo
+access, with:
+
+  make install PREFIX=~/perl
+
+Windows users can probably just run 'make install'
