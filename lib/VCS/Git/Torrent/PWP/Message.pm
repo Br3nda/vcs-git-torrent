@@ -46,3 +46,5 @@ accept a message with "unpack", setting up their relevant members.
   <http://www.gnu.org/licenses/>.
 
 =cut
+
+1;

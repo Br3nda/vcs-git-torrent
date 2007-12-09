@@ -59,3 +59,5 @@ The tracker keeps a list of peers and their download/upload status.
   <http://www.gnu.org/licenses/>.
 
 =cut
+
+1;

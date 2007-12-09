@@ -94,3 +94,5 @@ PWP messages.
   <http://www.gnu.org/licenses/>.
 
 =cut
+
+1;
