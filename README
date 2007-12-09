@@ -23,3 +23,8 @@ access, with:
   make install PREFIX=~/perl
 
 Windows users can probably just run 'make install'
+
+LICENSE
+-------
+This module is released under the GPLv3 only, not the regular Perl/GPL
+disjuction.
