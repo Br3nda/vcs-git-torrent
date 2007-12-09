@@ -76,8 +76,11 @@ connection, to get revisions from there instead.
 
 Based on an initial set of milestones for a summer of code student.
 
-  - tracker protocol
   - p2p protocol decoding library
+
+Sketched out, 'Choke' implemented
+
+  - tracker protocol
   - git repository access library - cat-file and object traversal
   - p2p handshake and peer discovery
   - p2p "references" message
@@ -131,7 +134,7 @@ subtype 'VCS::Git::Torrent::peer_id'
 		}
 	};
 
-# following a candidate for inclusion in MooseX::Socket
+# a sure candidate for inclusion in MooseX::Socket :)
 subtype 'VCS::Git::Torrent::port'
 	=> as Int
 	=> where {

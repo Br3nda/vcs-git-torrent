@@ -1,79 +1,107 @@
 
+package VCS::Git::Torrent::PWP;
+
 =head1 NAME
 
 VCS::Git::Torrent::PWP - Interface to the GitTorrent Peer Wire Protocol
 
 =head1 SYNOPSIS
 
- use VCS::Git::Torrent::PWP qw( pwp_message pwp_decode );
+ use VCS::Git::Torrent::PWP
+       qw( pwp_message pwp_decode :pwp_constants );
 
- my $message = pwp_message(CHOKE);
- $message    = pwp_message(UNCHOKE);
- $message    = pwp_message(INTERESTED);
- $message    = pwp_message(UNINTERESTED);
+ my $message = pwp_message(GTP_PWP_CHOKE);
+ $message    = pwp_message(GTP_PWP_UNCHOKE);
+ $message    = pwp_message(GTP_PWP_INTERESTED);
+ $message    = pwp_message(GTP_PWP_UNINTERESTED);
 
  # request
- $message    = pwp_message(PEERS);
+ $message    = pwp_message(GTP_PWP_PEERS);
 
  # response - %peers is (peer_ID => address)
- $message    = pwp_message(PEERS, %peers);
+ $message    = pwp_message(GTP_PWP_PEERS, %peers);
 
  # request
- $message    = pwp_message(REFERENCES);
+ $message    = pwp_message(GTP_PWP_REFERENCES);
 
  # announce
- $message    = pwp_message(REFERENCES, $ref_sha1);
+ $message    = pwp_message(GTP_PWP_REFERENCES, $ref_sha1);
 
  # send references (VCS::Git::Torrent::References objects)
- $message    = pwp_message(REFERENCES, @references_objects);
+ $message    = pwp_message(GTP_PWP_REFERENCES, @references_objects);
 
  # request reels
- $message    = pwp_message(REELS);
+ $message    = pwp_message(GTP_PWP_REELS);
 
  # response (VCS::Git::Torrent::CommitReel objects)
- $message    = pwp_message(REELS, @reels);
+ $message    = pwp_message(GTP_PWP_REELS, @reels);
 
  # request block bitmap
- $message    = pwp_message(BLOCKS, $reel, $offset, $length);
+ $message    = pwp_message(GTP_PWP_BLOCKS, $reel, $offset, $length);
 
  # response - the information is pulled from the $reel object
- $message    = pwp_message(BLOCKS, $reel, $offset, $length, 1);
+ $message    = pwp_message(GTP_PWP_BLOCKS, $reel, $offset, $length, 1);
 
  # request
- $message    = pwp_message(SCAN, $reel, $offset, $length);
+ $message    = pwp_message(GTP_PWP_SCAN, $reel, $offset, $length);
 
  # response - again pulls from the $reel object
- $message    = pwp_message(SCAN, $reel, $offset, $length, 1);
+ $message    = pwp_message(GTP_PWP_SCAN, $reel, $offset, $length, 1);
 
  # request objects, passing known heads
- $message    = pwp_message(REQUEST, \@objects, \@heads );
+ $message    = pwp_message(GTP_PWP_REQUEST, \@objects, \@heads );
 
  # request playback of a section of reel
- $message    = pwp_message(PLAY, $reel, $offset, $length );
+ $message    = pwp_message(GTP_PWP_PLAY, $reel, $offset, $length );
 
  # response
- $message    = pwp_message(PLAY, $reel, $offset, $length, 1 );
+ $message    = pwp_message(GTP_PWP_PLAY, $reel, $offset, $length, 1 );
 
  # generic pack generation
- $message    = pwp_message(PLAY, \@tokens, \@heads, 0, \@objects );
+ $message    = pwp_message(GTP_PWP_PLAY, \@tokens, \@heads, 0, \@objects );
 
  # stop a block download
- $message    = pwp_message(STOP, $reel, $offset, $length );
+ $message    = pwp_message(GTP_PWP_STOP, $reel, $offset, $length );
 
  # stop a 'request' download
  $message    = pwp_message(STOP, [$start_sha1, $end_sha1],
                            $offset, $length );
 
  # send a message down a socket.
- $message->send($socket);
+ $socket->send(scalar $message->pack);
 
  # decoding wire messages
- $message    = pwp_decode($socket);
+ $message    = pwp_decode($handle);
 
 =head1 DESCRIPTION
 
 This module provides an interface for encoding and decoding GTP/0.1
 PWP messages.
+
+=cut
+
+use VCS::Git::Torrent::PWP::Message qw(:constants);
+
+use strict 'vars', 'subs';
+
+use Sub::Exporter -setup =>
+	{ exports =>
+	  [ qw(pwp_message pwp_decode),
+	    grep { m{^GTP_PWP_} } keys %{__PACKAGE__."::"},
+	  ],
+	  groups =>
+	  [ pwp_constants =>
+	    [ grep { m{^GTP_PWP_} } keys %{__PACKAGE__."::"} ]
+	  ],
+	};
+
+sub pwp_message {
+	VCS::Git::Torrent::PWP::Message->create ( @_ )
+}
+
+sub pwp_decode {
+	VCS::Git::Torrent::PWP::Message->create_io ( @_ )
+}
 
 =head1 LICENSE
 
