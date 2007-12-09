@@ -36,7 +36,13 @@ while (@modules) {
 		@winners = shift @modules;
 	}
  	for my $module (sort @winners) {
+		my @fail;
+		local($SIG{__WARN__}) = sub {
+			push @fail, join " ", @_;
+			warn @_;
+		};
 		use_ok($module);
+		is (@fail, 0, "no warnings issued");
 		$done{$module}++;
 		delete $uses{$module};
 		delete $_->{$module} for values %uses;
