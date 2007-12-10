@@ -15,7 +15,8 @@ my $peer;
 eval { $peer = VCS::Git::Torrent::Peer->new };
 isnt($@, "", "attributes are required");
 
-my @where = ( address => "1.2.3.4", "port" => "1234" );
+my @RH = (repo_hash => "1234" x 10);
+my @where = ( address => "1.2.3.4", "port" => "1234", @RH );
 
 $peer = VCS::Git::Torrent::Peer->new
 	( @where,
@@ -39,7 +40,8 @@ $peer = VCS::Git::Torrent::Peer->new
 ok($peer, "They're two ;)");
 
 eval { $peer = VCS::Git::Torrent::Peer->new
-	       ( address => "1.2.3.4",
+	       ( @RH,
+		 address => "1.2.3.4",
 		 port    => "65536",
 		 peer_id => $peer_id ) };
 like($@, qr{\(port\) does not pass the type constraint},
@@ -50,6 +52,7 @@ like($@, qr{\(port\) does not pass the type constraint},
 	use Moose;
 	extends "VCS::Git::Torrent::Peer";
 	with "VCS::Git::Torrent::Peer::Local";
+	has '+torrent' => required => 0;
 }
 
 my $node = MyImpl->new(@where, peer_id => $peer_id);

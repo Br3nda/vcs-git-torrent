@@ -80,9 +80,12 @@ Based on an initial set of milestones for a summer of code student.
 
 Sketched out, 'Choke' implemented
 
+  - p2p handshake and peer discovery
+
+Handshake yes, peer disovery no.
+
   - tracker protocol
   - git repository access library - cat-file and object traversal
-  - p2p handshake and peer discovery
   - p2p "references" message
   - git repository access enhancement - arbitrary packfile generation
   - p2p "request" message (and "play" response)
@@ -134,11 +137,55 @@ subtype 'VCS::Git::Torrent::peer_id'
 		}
 	};
 
+subtype "VCS::Git::Torrent::sha1_hex"
+	=> as "Str"
+	=> where { length($_) == 40 and !m{[^0-9a-f]}i };
+
+subtype "VCS::Git::Torrent:git_object_id"
+	=> as "VCS::Git::Torrent::sha1_hex";
+
+subtype "VCS::Git::Torrent::repo_hash"
+	=> as "VCS::Git::Torrent::sha1_hex";
+
+use Moose;
+
+has 'repo_hash' =>
+	isa => "VCS::Git::Torrent::repo_hash",
+	is  => "ro",
+	required => 1,
+	lazy => 1,
+	default => sub {
+		die "no repo_hash passed in, and we're still quite stupid!\n";
+	};
+
 # a sure candidate for inclusion in MooseX::Socket :)
 subtype 'VCS::Git::Torrent::port'
 	=> as Int
 	=> where {
 		($_&65535) && !($_>>16);
 	};
+
+=head1 EXPORTS
+
+Currently nothing is exported by default by this module.
+
+=head2 start_peer_async(HASHREF) returns VCS::Git::Torrent::Peer::Async
+
+Starts a new VCS::Git::Torrent::Peer::Async in an asynchronous thread
+using Coro.
+
+=cut
+
+use Sub::Exporter -setup =>
+	{ exports => [ qw(start_peer_async) ],
+	};
+
+sub start_peer_async {
+	my %arguments = shift;
+
+	require VCS::Git::Torrent::Peer::Async;
+	my $peer = VCS::Git::Torrent::Peer::Async->new(%arguments);
+	return $peer;
+}
 
 1;

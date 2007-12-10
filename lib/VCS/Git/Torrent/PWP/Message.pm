@@ -127,6 +127,8 @@ sub create_io {
 		     payload => $payload );
 }
 
+requires 'action';
+
 my %LOADED;
 no warnings 'redefine';
 
@@ -144,6 +146,8 @@ sub create {
 
 	$class->new( $class->args(@_) );
 }
+
+no Moose::Util::TypeConstraints;
 
 sub type {
 	my $self = shift;

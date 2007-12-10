@@ -11,5 +11,11 @@ sub args {
 	croak("Choke has no arguments") if @_;
 	return();
 }
+sub action {
+	my $self = shift;
+	my $local_peer = shift;
+	my $connection = shift;
+	$connection->choked_in(1);
+}
 
 1;

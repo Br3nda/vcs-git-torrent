@@ -84,9 +84,11 @@ use VCS::Git::Torrent::PWP::Message qw(:constants);
 
 use strict 'vars', 'subs';
 
+use constant GTP_PWP_PROTO_NAME => "GTP/0.1";
+
 use Sub::Exporter -setup =>
 	{ exports =>
-	  [ qw(pwp_message pwp_decode),
+	  [ qw(pwp_message pwp_decode unpack_hex pack_hex),
 	    grep { m{^GTP_PWP_} } keys %{__PACKAGE__."::"},
 	  ],
 	  groups =>
@@ -94,6 +96,18 @@ use Sub::Exporter -setup =>
 	    [ grep { m{^GTP_PWP_} } keys %{__PACKAGE__."::"} ]
 	  ],
 	};
+
+use Carp;
+
+sub pack_hex {
+	croak "Can't hexpack '$_[0]'" if $_[0] =~ m{[^a-fA-F0-9]}
+		or length($_[0]) & 1;
+	my $rv = pack("C*", map { hex($_) } $_[0] =~ m{(..)}g);
+}
+
+sub unpack_hex {
+	join("", map { sprintf("%.2x", $_) } unpack("C*", $_[0]));
+}
 
 sub pwp_message {
 	VCS::Git::Torrent::PWP::Message->create ( @_ )
