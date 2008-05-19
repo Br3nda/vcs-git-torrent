@@ -38,14 +38,8 @@ $peer_2->connect("localhost:$port_1");
 is(Coro::nready, 3, "All set up and ready to go");
 
 use Coro::Event;
-use Coro::Timer qw(sleep);
 #use Coro;
-my $i;
-while ( $peer_1->num_connections == 0 and $i++ < 3 ) {
-	#diag("ceding - i = $i");
-	cede;
-	sleep 0.25;
-}
+Coro::Event::loop(1);
 #diag("finished");
 
 SKIP:{
@@ -71,8 +65,8 @@ SKIP:{
 
 	my $conn = $peer_2->connections->[0];
 
-	$i = 0;
-	sleep 0.25 while !$conn->choked_in and $i++ < 3;
+	Coro::Event::sweep;
+	cede;
 
 	ok($conn->choked_in,
 	   "Peer 2 felt the choke");
@@ -83,8 +77,7 @@ SKIP:{
 	is($peer_1->num_connections, 0, "Hung up on the victim");
 	$peer_1->shutdown;
 
-	$i = 0;
-	sleep 0.25 while $peer_2->num_connections != 0 and $i++ < 3;
+	Coro::Event::loop(1);
 
 	is ( $peer_2->num_connections, 0,
 	     "Peer 2 detected the hangup");
