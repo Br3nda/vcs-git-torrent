@@ -44,7 +44,7 @@ Coro::Event::loop(1);
 
 SKIP:{
 	ok($peer_1->num_connections, "Peer 1 found a peer")
-		or skip "no connection made", 8;
+		or skip "no connection made", 9;
 
 	ok(!$peer_2->connections->[0]->choked_in,
 	   "Peer 2 is not yet feeling the choke");
@@ -52,7 +52,7 @@ SKIP:{
 	use VCS::Git::Torrent::PWP qw(:pwp_constants);
 	my $victim = $peer_1->connections->[0]->remote;
 	ok($victim, "Peer 1 knows someone")
-		or skip "doesn't know anyone!", 6;
+		or skip "doesn't know anyone!", 7;
 
 	isnt($victim, $peer_2, "Peer 2 and victim look different");
 	# this won't match.  The outgoing ports are different.
@@ -70,6 +70,17 @@ SKIP:{
 
 	ok($conn->choked_in,
 	   "Peer 2 felt the choke");
+
+	# lets revive them.
+	$peer_1->send_message($victim, GTP_PWP_UNCHOKE);
+
+	Coro::Event::sweep;
+	cede;
+
+	# did they make it?
+	ok(!$conn->choked_in, "Peer 2 is breathing again!");
+
+	# peer 2 retaliates
 	$peer_2->send_message($conn->remote, GTP_PWP_CHOKE);
 
 	# but it's too late!
