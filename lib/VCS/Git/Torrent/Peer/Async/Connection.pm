@@ -105,10 +105,10 @@ sub loop {
 		$self->trace(sub {"listening"});
 		$_ = VCS::Git::Torrent::PWP::Message->create_io($socket);
 		$self->recv_lock->unlock;
-		$self->trace(sub {"got a message: $_ (self = $self)"});
 		$_ }
 	      ) {
 
+		$self->trace(sub {"got a message: $_ (self = $self)"});
 		$self->local->process($self, $message);
 
 	}
