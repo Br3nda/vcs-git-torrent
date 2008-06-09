@@ -76,7 +76,7 @@ sub reel_revlist {
 
 		$last = { commitid => $commitid,
 			  when => $when,
-			  }
+			  };
 		$seen{$commitid}++;
 		push @revs, $commitid;
 
