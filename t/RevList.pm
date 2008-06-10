@@ -122,7 +122,7 @@ sub reel_revlist {
 				}
 				elsif ( $x[$i][2] eq "tree" ) {
 					my $path = $x[$i][3];
-					my $pat = $path ? qr{^\Qpath\E/} : qr{.};
+					my $pat = $path ? qr{^\Q$path\E/} : qr{.};
 					$ready = !grep { $_->[3] =~ m{$pat} }
 						@x[$i+1..$#x];
 				}
