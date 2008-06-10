@@ -138,11 +138,11 @@ sub reel_revlist {
 		}
 
 		for ( @rfc_ordered ) {
-			push @reel, [ $offset, $_->[2], $_->[1], $_->[0] ];
+			push @reel, [ $offset, $_->[2], $_->[1], $_->[0], $_->[3] ];
 			$offset += $_->[1];
 		}
 
-		push @reel, [ $offset, $o_type, $o_size, $o_hash ];
+		push @reel, [ $offset, $o_type, $o_size, $o_hash, '(commit)' ];
 		$offset += $o_size;
 	}
 
