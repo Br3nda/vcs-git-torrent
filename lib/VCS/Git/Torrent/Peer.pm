@@ -1,24 +1,49 @@
 
 package VCS::Git::Torrent::Peer;
 
+=encoding utf8
+
 =head1 NAME
 
 VCS::Git::Torrent::Peer - a peer in a GTP/0.1 swarm
 
 =head1 SYNOPSIS
 
- my $peer = new VCS::Git::Torrent::Peer
-         (address => "1.2.3.4",
-          port    => "1234",
-          peer_id => "SomeStringExactly20B"
+ my $peer = VCS::Git::Torrent::Peer->new
+         ( repo_hash   => $repo_hash,
+           peer_id     => $peer_id,
+           address     => "1.2.3.4",
+           port        => "1234",
+         );
+
+ my $peer_in = VCS::Git::Torrent::Peer->new
+         ( repo_hash => $repo_hash,
+           from_addr => $socket->peeraddr,
+           from_port => $socket->peerport,
          );
 
 =head1 DESCRIPTION
 
-A Peer in a GitTorrent swarm has an address, port and an identifier.
-Normally, you will create objects of this class for remote peers, and
-one that implements the L<VCS::Git::Torrent::Peer::Local> role for
-peers which are connected to local repositories.
+A Peer in a GitTorrent swarm has a unique identifier, unique within an
+individual swarm.  Depending on how we know about this peer, we will
+know an incoming address, an outgoing address, or both.
+
+The Peer may be local; that is, it
+C<-E<gt>does("VCS::Git::Torrent::Peer::Local")>.  If that is the case,
+then it will not have a C<from_addr> or C<from_port>.  It may also
+have an associated thread or process that is serving incoming
+connections, depending on which class implements it.
+
+We may or may not have a connection to the peer.  Local nodes have a
+C<connections> property that track this.  Each connection object will
+implement the L<VCS::Git::Torrent::Peer::Connection> Role.  The
+convenience method C<is_connected_to> will check to see if there is an
+active connection between the node in question and the node asked for.
+
+The other type of connection between nodes is the C<knows>
+relationship; this is another set of nodes.  To avoid an O(N²) number
+of these sets, they are only kept for nodes that we hold an active
+connection to.
 
 =cut
 
@@ -26,6 +51,17 @@ use Moose;
 use VCS::Git::Torrent;
 
 =head1 ATTRIBUTES
+
+=head2 repo_hash
+
+The identifier of the swarm this peer is a member of
+
+=cut
+
+has 'repo_hash' =>
+	isa => "VCS::Git::Torrent::repo_hash",
+	is => "ro",
+	required => 1;
 
 =head2 peer_id
 
@@ -36,8 +72,7 @@ in length uniquely idenitifying the peer.
 
 has 'peer_id' =>
 	isa => "VCS::Git::Torrent::peer_id",
-	required => 1,
-	is  => "ro";
+	is  => "rw";
 
 =head2 address
 
@@ -48,8 +83,11 @@ hostname; for example, an IPv4 address or a DNS hostname.
 
 has 'address' =>
 	isa => "Str",
-	required => 1,
 	is => "ro";
+
+has 'from_addr' =>
+	isa => "Str",
+	is  => "ro";
 
 =head2 port
 
@@ -60,8 +98,51 @@ for connecting to this peer.
 
 has 'port' =>
 	isa => "VCS::Git::Torrent::port",
-	required => 1,
-	is => "ro";
+	is => "rw";
+
+has 'from_port' =>
+	isa => "VCS::Git::Torrent::port",
+	is  => "ro";
+
+=head2 knows
+
+Peers we know this node knows - an Array managed as a set
+
+=cut
+
+has 'knows' =>
+	isa => "ArrayRef[VCS::Git::Torrent::Peer]",
+	is  => "rw",
+	default => sub { [] };
+
+=head2 has_connections
+
+=head2 num_connections
+
+Return whether or not the peer has other peers.
+
+=cut
+
+sub has_connections {
+	my $self = shift;
+	$#{$self->connections} > -1;
+}
+
+sub num_connections {
+	my $self = shift;
+	$#{$self->connections}+1;
+}
+
+use Moose::Util::TypeConstraints;
+
+subtype 'does::VCS::Git::Torrent::Peer::Connection'
+	=> as Object
+	=> where { $_->does("VCS::Git::Torrent::Peer::Connection") };
+
+has 'connections' =>
+	isa => 'ArrayRef[does::VCS::Git::Torrent::Peer::Connection]',
+	is  => "ro",
+	default => sub { [] };
 
 1;
 

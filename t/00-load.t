@@ -10,13 +10,13 @@ my @modules;
 my %uses;
 
 finddepth(sub {
-	m{\.pm$} && do {
+	m{^\w.*\.pm$} && do {
 		my $module = $File::Find::name;
 		$module =~ s{.*/lib.}{};
 		$module =~ s{[/\\]}{::}g;
 		$module =~ s{.pm$}{};
 		push @modules, $module;
-		open MODULE, "<", $_ or die $!;
+		open MODULE, "<", $_ or die "Failed to open ($_): $!";
 		while(<MODULE>) {
 			if (m{^use (\S+)}) {
 				$uses{$module}{$1}++;
@@ -36,7 +36,13 @@ while (@modules) {
 		@winners = shift @modules;
 	}
  	for my $module (sort @winners) {
+		my @fail;
+		local($SIG{__WARN__}) = sub {
+			push @fail, join " ", @_;
+			warn "# oh look a warning: @_";
+		};
 		use_ok($module);
+		is (@fail, 0, "no warnings issued");
 		$done{$module}++;
 		delete $uses{$module};
 		delete $_->{$module} for values %uses;

@@ -27,6 +27,57 @@ attributes that can only ever be performed on local Peers.
 
 use Moose::Role;
 
+use Carp;
+
+has '+peer_id' =>
+	default => sub {
+		pack("S*", map { int(rand(65535)) } (1..10));
+	};
+
+has 'peername' =>
+	isa => "Str",
+	is  => "ro";
+
+has 'peerport' =>
+	isa => "VCS::Git::Torrent::port",
+	is  => "ro";
+
+has 'peerpeer_id' =>
+	isa => "VCS::Git::Torrent::peer_id",
+	is => "rw";
+
+has '+port' => required => 0;
+has '+address' => required => 0;
+sub has_address {
+	my $self = shift;
+	!!$self->address;
+}
+sub has_port {
+	my $self = shift;
+	!!$self->port;
+}
+
+sub BUILD {
+	my $self = shift;
+	croak "need a peername or listen address"
+		unless ($self->port or
+			$self->peername && $self->peerport);
+}
+
+has 'torrent' =>
+	isa => "VCS::Git::Torrent",
+	is => "ro",
+	required => 1;
+
+has '+repo_hash' =>
+	lazy => 1,
+	default => sub {
+		my $self = shift;
+		croak "no torrent passed to new local Peer\n"
+			unless $self->torrent;
+		$self->torrent->repo_hash;
+	};
+
 =head1 ATTRIBUTES
 
 =head2 max_peers
