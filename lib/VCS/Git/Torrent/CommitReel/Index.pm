@@ -53,15 +53,19 @@ sub update_index {
 		$last_sha1 = $last_entry->objectid;
 	}
 
-	@revlist = reel_revlist($self->git, '--all');
+	my $iter = $self->reel_revlist_iter;
 
-	if ( defined $last_sha1 ) {
-		while($rev = shift @revlist) {
-			last if ( $rev->[3] eq $last_sha1 );
-		}
+	while ( my $rev = $iter->() ) {
+		$self->index->{$rev->offset} = freeze $rev;
 	}
-#print STDERR 'last SHA1 is: ' . $last_sha1 . "\n" if ( defined $last_sha1 );
-	foreach(@revlist) {
+}
+
+sub reel_revlist_iter {
+	my $self = shift;
+
+	no strict 'refs';
+	sub {
+		&{"..."}();
 		$offset = $_->[0];
 
 		$rev = VCS::Git::Torrent::CommitReel::Entry->new(
@@ -71,9 +75,6 @@ sub update_index {
 			objectid => $_->[3],
 			pathctid => $_->[4],
 		);
-#print STDERR 'freezing: ' . sprintf("%8i %8s %8i %s %s\n", @$_);
-		$self->index->{$offset} = freeze $rev;
-	}
-}
+	};
 
 1;
