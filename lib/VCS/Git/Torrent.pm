@@ -221,6 +221,12 @@ sub contents {
 	my $self = shift;
 }
 
+use Git;
+has 'git' =>
+	isa => 'Git',
+	is  => 'ro',
+	required => 1;
+
 =head1 EXPORTS
 
 Currently nothing is exported by default by this module.
