@@ -5,14 +5,11 @@ use Moose;
 use VCS::Git::Torrent;
 use MooseX::TimestampTZ;
 
-has 'repo_hash' =>
-	isa => "VCS::Git::Torrent::repo_hash",
-	is => "ro",
-	required => 1,
-	lazy => 1,
-	default => sub {
-		&{"..."};
-	};
+has 'torrent' =>
+	is => "rw",
+	weak_ref => 1,
+	isa => "VCS::Git::Torrent",
+	handles => [ "git", "repo_hash" ];
 
 has 'tag_id' =>
 	isa => "VCS::Git::Torrent::git_object_id",
@@ -29,5 +26,9 @@ has 'tagdate' =>
 
 has 'comment' =>
 	isa => "Str";
+
+has 'refs' =>
+	is => "ro",
+	isa => "HashRef[VCS::Git::Torrent::sha1_hex]";
 
 1;

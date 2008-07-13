@@ -192,7 +192,14 @@ has 'repo_hash' =>
 has 'references' =>
 	isa => "ArrayRef[VCS::Git::Torrent::Reference]",
 	#required => 1,
-	is  => "rw";
+	is  => "rw",
+	trigger => sub {
+		my $self = shift;
+		my $value = shift;
+		for my $x ( @$value ) {
+			$x->torrent($self);
+		}
+	};
 
 has 'trackers' =>
 	isa => "ArrayRef[URI]",
