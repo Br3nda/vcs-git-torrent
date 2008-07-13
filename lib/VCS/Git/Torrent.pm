@@ -172,13 +172,14 @@ use VCS::Git::Torrent::Repo;
 
 has 'repo' =>
 	isa => "VCS::Git::Torrent::Repo",
-	required => 1,
+	#required => 1,
 	is  => "ro";
 
 use Digest::SHA1 qw(sha1_hex);
 use Bencode qw(bencode);
 
 has 'repo_hash' =>
+	is => "ro",
 	isa => "VCS::Git::Torrent::sha1_hex",
 	required => 1,
 	lazy => 1,
@@ -190,12 +191,12 @@ has 'repo_hash' =>
 
 has 'references' =>
 	isa => "ArrayRef[VCS::Git::Torrent::Reference]",
-	required => 1,
+	#required => 1,
 	is  => "rw";
 
 has 'trackers' =>
 	isa => "ArrayRef[URI]",
-	required => 1,
+	#required => 1,
 	is  => "rw";
 
 sub marshall {
