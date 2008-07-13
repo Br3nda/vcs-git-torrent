@@ -15,3 +15,5 @@ ok($git, 'We have a git repo');
 
 my $reel_index = VCS::Git::Torrent::CommitReel::Index->new( git => $git );
 ok($reel_index, 'The reel sees the repo');
+
+$reel_index->update_index;
