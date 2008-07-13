@@ -39,8 +39,7 @@ package VCS::Git::Torrent::PWP::Message;
 
 use Moose::Role;
 use Moose::Util::TypeConstraints;
-use Class::Autouse;
-use Carp;
+use Carp qw(croak confess);
 
 my %constants;
 our @TYPE_CLASS;
@@ -50,14 +49,17 @@ BEGIN {
 		qw(choke unchoke interested uninterested peers
 		   references reels blocks scan request play stop);
 	require constant;
+	my @classes;
 	for ( my $i = 0; $i <= $#message_types; $i++ ) {
 		my $t = $message_types[$i];
 		$constants{"GTP_PWP_".uc($t)} = $i;
 		my $class = __PACKAGE__."::".ucfirst($t);
 		push @TYPE_CLASS, $class;
 		$CLASS_TYPE{$class} = $i;
-		eval { Class::Autouse->import($class); };
+		push @classes, $class;
 	}
+	require Class::Autouse;
+	eval { Class::Autouse->import(@classes) };
 
 	constant->import(\%constants);
 }
@@ -141,6 +143,7 @@ sub class_for {
 
 sub create {
 	my $class = (shift)->class_for(shift);
+	confess "wth?" unless $class;
 	Class::Autouse->autouse($class)
 			unless $LOADED{$class}++;
 
