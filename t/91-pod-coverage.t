@@ -10,7 +10,7 @@ plan skip_all => 'Test::Pod::Coverage 1.04 required' if $@;
 plan skip_all => 'set TEST_POD to enable this test' unless $ENV{TEST_POD};
 
 all_pod_coverage_ok
-	({ also_private => [ qr/^meta$/ ],
+	({ also_private => [ qr/^(meta|BUILD)$/ ],
 	});
 
 # Copyright (C) 2007  Sam Vilain

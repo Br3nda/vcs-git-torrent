@@ -40,12 +40,7 @@ has 'index' =>
 		VCS::Git::Torrent::CommitReel::Index->new(),
 	};
 
-=head2 BUILD
-
-Moose sub which is called on object creation; makes the index for the reel
-
-=cut
-
+# make sure the index has a reference to us
 sub BUILD {
 	my $self = shift;
 	$self->index->reel($self);
