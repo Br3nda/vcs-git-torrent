@@ -220,6 +220,13 @@ has 'trackers' =>
 	#required => 1,
 	is  => "rw";
 
+=head2 marshall
+
+Return a reference to an array suitable for bencoding and hashing with SHA1
+to produce a repo_hash.
+
+=cut
+
 sub marshall {
 	my $self = shift;
 
@@ -236,10 +243,6 @@ sub marshall {
 		}
 	}
 	\%marshalled;
-}
-
-sub contents {
-	my $self = shift;
 }
 
 use Git;
