@@ -17,8 +17,7 @@ VCS::Git::Torrent - distributed version control swarm
          description => "My branches",
          pubkey      => "0xdeadbeef",
        },
-       references => VCS::Git::Torrent::References->new
-               ( ... ),
+       references => [ VCS::Git::Torrent::References->new( ... ) ],
        trackers   => [ URI->new(...), ... ],
        # created_by, creation_date generated for you
      );
