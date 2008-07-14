@@ -14,21 +14,24 @@ has 'torrent' =>
 has 'tag_id' =>
 	isa => "VCS::Git::Torrent::git_object_id",
 	is => "ro",
-	required => 1;
+	#required => 1
+	;
 
 has 'tagged_object' =>
 	isa => "VCS::Git::Torrent::git_object_id",
 	is => "ro",
-	required => 1;
+	#required => 1
+	;
 
 has 'tagger' =>
 	isa => "Str",
 	is => "ro",
-	required => 1;
+	#required => 1
+	;
 
 has 'tagdate' =>
 	isa => "TimestampTZ",
-	required => 1,
+	#required => 1,
 	coerce => 1,
 	is => "ro",
 	lazy => 1,
@@ -36,13 +39,14 @@ has 'tagdate' =>
 
 has 'comment' =>
 	isa => "Str",
-	required => 1,
+	#required => 1,
 	is => "ro";
 
 has 'refs' =>
 	is => "ro",
 	isa => "HashRef[VCS::Git::Torrent::sha1_hex]",
-	required => 1;
+	#required => 1
+	;
 
 sub BUILD {
 	my $self = shift;
