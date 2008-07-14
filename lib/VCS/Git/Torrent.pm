@@ -125,6 +125,7 @@ use MooseX::TimestampTZ;
 use 5.008001;
 use utf8;
 
+BEGIN {
 subtype 'VCS::Git::Torrent::peer_id'
 	=> as Str
 	=> where {
@@ -154,6 +155,7 @@ subtype 'VCS::Git::Torrent::port'
 	=> where {
 		($_&65535) && !($_>>16);
 	};
+}
 
 has 'comment' =>
 	isa => "Str",
