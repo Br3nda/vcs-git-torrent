@@ -189,10 +189,23 @@ has 'repo_hash' =>
 		sha1_hex(bencode($repo_hash));
 	};
 
+use VCS::Git::Torrent::Reference;
+
 has 'references' =>
 	isa => "ArrayRef[VCS::Git::Torrent::Reference]",
 	#required => 1,
 	is  => "rw",
+	trigger => sub {
+		my $self = shift;
+		my $value = shift;
+		for my $x ( @$value ) {
+			$x->torrent($self);
+		}
+	};
+
+has 'reels' =>
+	isa => "ArrayRef[VCS::Git::Torrent::CommitReel]",
+	is => "rw",
 	trigger => sub {
 		my $self = shift;
 		my $value = shift;

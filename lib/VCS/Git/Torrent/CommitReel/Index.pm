@@ -15,6 +15,12 @@ has 'index' =>
 		$self->open_index;
 	};
 
+has 'reel' =>
+	isa => "VCS::Git::Torrent::CommitReel",
+	is => "rw",
+	weak_ref => 1,
+	handles => [ 'git' ];
+
 sub open_index {
 	my $self = shift;
 	my %index;
@@ -30,11 +36,6 @@ sub open_index {
 
 	\%index;
 }
-
-has 'git' =>
-	isa => 'Git',
-	is  => 'ro',
-	required => 1;
 
 sub update_index {
 	my $self = shift;
