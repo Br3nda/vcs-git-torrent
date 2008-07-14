@@ -71,12 +71,7 @@ sub has_port {
 	!!$self->port;
 }
 
-=head2 BUILD
-
-Internal initialization function.
-
-=cut
-
+# initialize the peer
 sub BUILD {
 	my $self = shift;
 	croak "need a peername or listen address"
