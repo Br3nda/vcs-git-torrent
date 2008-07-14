@@ -1,6 +1,36 @@
 
 package VCS::Git::Torrent::Reference;
 
+=head1 NAME
+
+VCS::Git::Torrent::Reference - git repository state, encapsulated in a tag
+
+=head1 SYNOPSIS
+
+ use VCS::Git::Torrent::Reference;
+
+ # in this form, the other parameters are pulled from the specified tag
+ my $ref = VCS::Git::Torrent::Reference->new(
+     torrent => $t, # VCS::Git::Torrent object
+     tag_id  => $tagid,
+ );
+
+ print $ref->tagged_object . "\n";
+ print $ref->tagger . "\n";
+ print $ref->tagdate . "\n";
+ print $ref->comment . "\n";
+
+ foreach(keys(%{$ref->refs})) {
+     print $_ . " => " . $ref->refs->{$_} . "\n";
+ }
+
+=head1 DESCRIPTION
+
+This module provides a representation of the reference object, AKA the signed
+repository reference list encapsulated in a git tag.
+
+=cut
+
 use Moose;
 use VCS::Git::Torrent;
 use MooseX::TimestampTZ;
@@ -14,7 +44,8 @@ has 'torrent' =>
 has 'tag_id' =>
 	isa => "VCS::Git::Torrent::git_object_id",
 	is => "ro",
-	required => 1;
+#	required => 1;
+	;
 
 has 'tagged_object' =>
 	isa => "VCS::Git::Torrent::git_object_id",
@@ -52,6 +83,20 @@ has 'refs' =>
 	required => 1,
 	lazy => 1,
 	default => \&buildRefs;
+
+=head2 buildComment
+
+=head2 buildRefs
+
+=head2 buildTagDate
+
+=head2 buildTaggedObject
+
+=head2 buildTagger
+
+Internal functions to populate any uninitialized parameters, when possible.
+
+=cut
 
 sub buildComment {
 	my $self = shift;
@@ -164,18 +209,18 @@ sub buildTagger {
 	$tagger;
 }
 
-sub buildTag {
-	my $self = shift;
-	my $tag_id = $self->tag_id;
-	my $line;
-
-	if ( $tag_id ) {
-	}
-	else {
-		# creating a references object from scratch
-		die "no refs or tag_id given"
-			unless $self->refs;
-	}
-}
+#sub buildTag {
+#	my $self = shift;
+#	my $tag_id = $self->tag_id;
+#	my $line;
+#
+#	if ( $tag_id ) {
+#	}
+#	else {
+#		# creating a references object from scratch
+#		die "no refs or tag_id given"
+#			unless $self->refs;
+#	}
+#}
 
 1;
