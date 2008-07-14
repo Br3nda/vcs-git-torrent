@@ -99,6 +99,14 @@ use Sub::Exporter -setup =>
 
 use Carp;
 
+=head2 pack_hex
+
+=head2 unpack_hex
+
+Wrappers to pack and unpack hex to and from bits
+
+=cut
+
 sub pack_hex {
 	croak "Can't hexpack '$_[0]'" if $_[0] =~ m{[^a-fA-F0-9]}
 		or length($_[0]) & 1;
@@ -108,6 +116,14 @@ sub pack_hex {
 sub unpack_hex {
 	join("", map { sprintf("%.2x", $_) } unpack("C*", $_[0]));
 }
+
+=head2 pwp_message
+
+=head2 pwp_decode
+
+Create and decode PWP messages
+
+=cut
 
 sub pwp_message {
 	VCS::Git::Torrent::PWP::Message->create ( @_ )
