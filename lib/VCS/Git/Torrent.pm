@@ -220,10 +220,10 @@ has 'trackers' =>
 	#required => 1,
 	is  => "rw";
 
-=head2 marshall
+=head2 marshall() returns HashRef
 
-Return a reference to an array suitable for bencoding and hashing with SHA1
-to produce a repo_hash.
+Return a reference to a data structure suitable for bencoding, or for
+hashing with SHA1 to produce a repo_hash.
 
 =cut
 
