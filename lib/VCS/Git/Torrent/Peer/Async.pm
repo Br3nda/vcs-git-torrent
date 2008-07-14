@@ -93,6 +93,12 @@ sub _start {
 	}
 }
 
+=head2 socket_args
+
+Return a hash containing local socket arguments.
+
+=cut
+
 sub socket_args {
 	my $self = shift;
 	( ( $self->has_address
@@ -117,6 +123,12 @@ use Socket;
 #        is => "ro",
 #        default => sub { [] };
 
+=head2 connect($peer)
+
+Connect to $peer, where $peer is either a host(:port) string, or a Peer object.
+
+=cut
+
 sub connect {
 	my $self = shift;
 
@@ -138,12 +150,24 @@ sub connect {
 
 }
 
+=head2 process
+
+Call the message-specific handler.
+
+=cut
+
 sub process {
 	my $self = shift;
 	my $connection = shift;
 	my $message = shift;
 	$message->action($self, $connection);
 }
+
+=head2 shutdown
+
+Shut this peer down (by closing connections to all other peers).
+
+=cut
 
 sub shutdown {
 	my $self = shift;
@@ -154,6 +178,12 @@ sub shutdown {
 	@{$self->connections} = ();
 }
 
+=head2 connection($peer)
+
+Return the connection of this peer to $peer.
+
+=cut
+
 sub connection {
 	my $self = shift;
 	my $peer = shift;
@@ -161,6 +191,14 @@ sub connection {
 		@{ $self->connections };
 	$connection;
 }
+
+=head2 connections_insert
+
+=head2 connections_remove
+
+Insert and remove a connection from this peer's list.
+
+=cut
 
 sub connections_insert {
 	my $self = shift;
@@ -182,6 +220,12 @@ sub connections_remove {
 			@{$self->connections};
 }
 
+=head2 connected_to($peer)
+
+Are we connected to $peer?
+
+=cut
+
 sub connected_to {
 	my $self = shift;
 	my $peer = shift;
@@ -193,6 +237,12 @@ sub connected_to {
 	$who;
 }
 
+=head2 hangup($victim)
+
+Hangup on victim.
+
+=cut
+
 sub hangup {
 	my $self = shift;
 	my $victim = shift;
@@ -200,6 +250,12 @@ sub hangup {
 	$connection->shutdown;
 	$self->connections_remove($connection);
 }
+
+=head2 send_message($to, ...)
+
+Send a message to $to.
+
+=cut
 
 sub send_message {
 	my $self = shift;
