@@ -48,11 +48,12 @@ sub BUILD {
 
 use Digest::SHA1 qw(sha1_hex);
 
-=head2 reel_id
+=head2 reel_id returns [ sha1_hex, sha1_hex ]
 
-Return a reference to an array as follows:
-
-[ tag_id_of_start_reference, tag_id_of_end_reference ]
+Return a reference that uniquely identifies the reel; that is, the ID
+of the tag objects that delimit its start and end.  This is used in
+various parts of the protocol to uniquely identify a reel, and is
+defined in section I<FIXME>.
 
 =cut
 
