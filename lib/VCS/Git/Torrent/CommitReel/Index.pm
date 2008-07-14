@@ -63,18 +63,168 @@ sub update_index {
 sub reel_revlist_iter {
 	my $self = shift;
 
-	no strict 'refs';
-	sub {
-		&{"..."}();
-		$offset = $_->[0];
+	my @refs = values %{ $self->reel->end->refs };
+	my @not;
+	if ( $self->reel->start ) {
+		@not = values %{ $self->reel->start->refs };
+	}
 
-		$rev = VCS::Git::Torrent::CommitReel::Entry->new(
-			offset   => $offset,
-			type     => $_->[1],
-			size     => $_->[2],
-			objectid => $_->[3],
-			pathctid => $_->[4],
-		);
+	my ($rev_list, $ctx) = $self->git->command_output_pipe
+		("rev-list", "--date-order", "--reverse",
+		 "--pretty=format:%P %ct",
+		 @refs, @not ? ( "--not" => @not ) : () );
+
+	my @peek;
+	my $get_rev_list = sub {
+		if ( @_ ) {
+			unshift @peek, @_;
+			return;
+		}
+		elsif ( @peek ) {
+			return shift @peek;
+		}
+		return if not defined $rev_list;
+		if (eof($rev_list)) {
+			$self->git->command_close_pipe($rev_list, $ctx);
+			undef($rev_list);
+			return;
+		}
+		my ($commitid) = <$rev_list> =~ m{^commit (.*)} or die;
+		my ($parents, $when) = <$rev_list> =~ m{^(.*) (\d+)$}
+			or die;
+		my %parents = map { $_ => 1 } split /\s+/, $parents;
+		({ commitid => $commitid,
+		   parents => \%parents,
+		   when => $when });
 	};
+
+	# note: the fact we need to pre-populate this %seen may be a
+	# good reason to say that reels should always include all the
+	# objects required for the first revisions in them; it
+	# introduces one point of bad scalability
+	my %seen;
+	if ( @not ) {
+		my ($base, $ctx) = $self->git->command_output_pipe
+			("rev-list", "--objects", @not );
+		while ( my $rev = <$base> ) {
+			chomp($rev);
+			$seen{$rev}++;
+		}
+		$self->git->command_close_pipe($base, $ctx);
+	}
+
+	my @ready;
+	my $commit_iter = sub {
+		# keep grabbing items off the list, until we see one that
+		# a) has a different commit date, or
+		# b) has a parent which has not been written to the
+		#    reel yet ("seen")
+		my $next = $get_rev_list->() or return shift @ready;
+		while ( $next and
+			( !@ready or
+			  $next->{when} == $ready[0]->{when} ) and
+			not grep { not $seen{$_} }
+			keys %{ $next->{parents} }
+		      ) {
+			push @ready, $next;
+			$next = $get_rev_list->();
+		}
+		# put one back
+		$get_rev_list->($next) if $next;
+
+		# nothing left on @ready is not "ready to go"
+		@ready = sort { $a->{commitid} cmp $b->{commitid} }
+				@ready;
+
+		return shift @ready;
+	};
+
+	my @objects;
+	my $offset = 0;
+	my $git = $self->git;
+	my $object_iter = sub {
+		if ( !@objects ) {
+			my $next_commit = $commit_iter->()
+				or return;
+
+			my $id = $next_commit->{commitid};
+
+			@objects = grep { !$seen{$_->[0]}++ }
+				$self->_commit_objects($id);
+		}
+
+		my $x = shift @objects;
+
+		my $rev = VCS::Git::Torrent::CommitReel::Entry->new(
+			offset   => $offset,
+			type     => $x->[2],
+			size     => $x->[1],
+			objectid => $x->[0],
+			($x->[3] ?
+			 ( path  => $x->[3] ) : ()),
+		);
+
+		$offset += $rev->size;
+
+		return $rev;
+	};
+
+	return $object_iter;
+}
+
+sub _commit_objects {
+	my $self = shift;
+	my $commitid = shift;
+
+	my $git = $self->git;
+
+	my $commit_size = $git->command(qw(cat-file -s), $commitid);
+	my @deps = $git->command (qw(rev-list --objects), $commitid.'^!');
+
+	# the sort order in the RFC is quite specific - objects must
+	# have the objects they refer to come first.
+	my @x;
+	foreach my $d (sort { $a cmp $b } @deps) {
+		my ($d_hash, $d_what) = split /\s+/, $d, 2;
+		next if $d_hash eq $commitid;
+		my $d_size = $git->command ('cat-file', '-s', $d_hash);
+		my $d_type = $git->command ('cat-file', '-t', $d_hash);
+		chomp($d_type);
+		push @x, [ $d_hash, $d_size, $d_type, $d_what ];
+	}
+
+	my @rfc_ordered;
+
+	# an object is ready if:
+	#   - it is a blob, or
+	#   - it is a tree, but there are no other trees or
+	#     blobs under a sub-path of this one.
+	while ( @x ) {
+		for (my $i = 0; $i <= $#x; $i++ ) {
+			my $ready;
+			if ( $x[$i][2] eq "blob" ) {
+				$ready = 1;
+			}
+			elsif ( $x[$i][2] eq "tree" ) {
+				my $path = $x[$i][3];
+				my $pat = $path ? qr{^\Q$path\E/} : qr{.};
+				$ready = !grep { $_->[3] && $_->[3] =~ m{$pat} }
+					@x[$i+1..$#x];
+			}
+			else {
+				confess "encountered strange object "
+					."'$x[$i][2]'";
+			}
+			if ( $ready ) {
+				push @rfc_ordered, $x[$i];
+				@x=(@x[0..$i-1], @x[$i+1..$#x]);
+				$i = -1;
+			}
+		}
+	}
+
+	push @rfc_ordered, [ $commitid, $commit_size, "commit" ];
+	@rfc_ordered;
+}
 
 1;
