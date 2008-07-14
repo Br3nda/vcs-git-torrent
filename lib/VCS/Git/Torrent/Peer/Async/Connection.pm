@@ -50,6 +50,12 @@ use Carp;
 use VCS::Git::Torrent::PWP qw(:pwp_constants pack_hex unpack_hex);
 use constant RANDOM_BEHAVIOUR_BITS => "\0" x 8;
 
+=head2 socket_args
+
+Return a hash consisting of the remote addres, port, and protocol used.
+
+=cut
+
 sub socket_args {
 	my $self = shift;
 	( PeerHost => $self->remote->address,
@@ -84,6 +90,12 @@ has 'error_desc' =>
 	isa => "Str",
 	is => "rw";
 
+=head2 fail($when, $description)
+
+Debug fail sub.
+
+=cut
+
 sub fail {
 	my $self = shift;
 	my $when = shift;
@@ -94,6 +106,12 @@ sub fail {
 	$self->cancel;
 	return();
 }
+
+=head2 loop
+
+Main async/Coro message-processing loop.
+
+=cut
 
 sub loop {
 	my $self = shift;
@@ -116,6 +134,12 @@ sub loop {
 	$self->shutdown;
 }
 
+=head2 send_handshake
+
+Send a handshake to whatever we're connected to.
+
+=cut
+
 sub send_handshake {
 	my $self = shift;
 	confess "called from wrong coro" unless Coro::current() == $self->coro;
@@ -135,6 +159,12 @@ sub send_handshake {
 	$wrote == length($handshake)
 		or return $self->fail("handshake", "wrote only $wrote bytes");
 }
+
+=head2 handshake
+
+Wait for a handshake from whatever we're connected to.
+
+=cut
 
 sub handshake {
 	my $self = shift;
@@ -182,6 +212,12 @@ sub handshake {
 	$self->remote->peer_id($buf);
 }
 
+=head2 send_message
+
+Pack a message and send it off.
+
+=cut
+
 sub send_message {
 	my $self = shift;
 	my $message = shift;
@@ -195,6 +231,12 @@ sub send_message {
 			 .length($message)." bytes written");
 	$self->send_lock->unlock;
 }
+
+=head2 shutdown
+
+Your socket has performed an illegal operation and must be shut down.
+
+=cut
 
 sub shutdown {
 	my $self = shift;
