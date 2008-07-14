@@ -91,7 +91,13 @@ has 'length' =>
 		CORE::length($self->payload)+4;
 	};
 
-my $i = 0;
+=head2 pack
+
+Packs the message length and type into network-order bytes, and append the
+message payload.
+
+=cut
+
 sub pack {
 	my $self = shift;
 
@@ -104,6 +110,14 @@ sub pack {
 
 requires 'payload';
 requires 'args';
+
+=head2 create_io($io)
+
+Read a PWP message from $io.
+
+Returns a message class depending on what was read.
+
+=cut
 
 sub create_io {
 	my $base_class = shift;
@@ -134,12 +148,24 @@ requires 'action';
 my %LOADED;
 no warnings 'redefine';
 
+=head2 class_for($type)
+
+Return the class used for the specified $type.
+
+=cut
+
 sub class_for {
 	shift;
 	my $type = shift;
 	$TYPE_CLASS[$type]
 		or croak "bad PWP message type $type";
 }
+
+=head2 create
+
+Create a PWP message to send over the network.
+
+=cut
 
 sub create {
 	my $class = (shift)->class_for(shift);
@@ -151,6 +177,12 @@ sub create {
 }
 
 no Moose::Util::TypeConstraints;
+
+=head2 type
+
+Return the constant for the specified class.
+
+=cut
 
 sub type {
 	my $self = shift;
