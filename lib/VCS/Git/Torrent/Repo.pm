@@ -1,6 +1,12 @@
 
 package VCS::Git::Torrent::Repo;
 
+=head1 NAME
+
+VCS::Git::Torrent::Repo
+
+=cut
+
 use VCS::Git::Torrent;
 
 use Moose;
