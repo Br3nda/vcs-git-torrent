@@ -6,7 +6,6 @@ use Moose;
 use Storable qw( freeze thaw );
 
 use VCS::Git::Torrent::CommitReel::Entry;
-use VCS::Git::Torrent::CommitReel::RevList;
 
 has 'index' =>
 	isa => 'HashRef',
