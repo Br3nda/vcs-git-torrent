@@ -48,14 +48,34 @@ has 'peerpeer_id' =>
 
 has '+port' => required => 0;
 has '+address' => required => 0;
+
+=head2 has_address
+
+Do we have an address?
+
+=cut
+
 sub has_address {
 	my $self = shift;
 	!!$self->address;
 }
+
+=head2 has_port
+
+Do we have a port?
+
+=cut
+
 sub has_port {
 	my $self = shift;
 	!!$self->port;
 }
+
+=head2 BUILD
+
+Internal initialization function.
+
+=cut
 
 sub BUILD {
 	my $self = shift;
