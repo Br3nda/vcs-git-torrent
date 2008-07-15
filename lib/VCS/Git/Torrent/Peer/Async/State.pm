@@ -1,6 +1,18 @@
 
 package VCS::Git::Torrent::Peer::Async::State;
 
+=head1 NAME
+
+VCS::git::Torrent::Peer::Async::State
+
+=head1 DESCRIPTION
+
+Contains the L<Coro> object as C<coro>.
+
+Provides the C<trace> debugging function.
+
+=cut
+
 use Moose::Role;
 
 use Coro;
@@ -40,6 +52,12 @@ use Sub::Exporter -setup =>
 	  groups => { default => ['trace'] } };
 
 use constant DEBUG => 0;
+
+=head2 trace(&coderef)
+
+If C<DEBUG> is set, print out some debugging by calling the passed coderef.
+
+=cut
 
 BEGIN {
 	if ( DEBUG ) {
