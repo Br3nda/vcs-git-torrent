@@ -10,6 +10,30 @@ subtype "VCS::Git::SHA1" => as "Str" => where { /^[0-9a-f]{40}$/ };
 
 package VCS::Git::Torrent::CommitReel::Entry;
 
+=head1 NAME
+
+VCS::Git::Torrent::CommitReel::Entry - an entry in the RFC-ordered commit reel
+
+=head1 DESCRIPTION
+
+An Entry consists of the following:
+
+=over 4
+
+=item offset
+
+=item type (VCS::Git::object_type)
+
+=item size
+
+=item objectid
+
+=item path (for debugging)
+
+=back
+
+=cut
+
 use Moose;
 use Storable;
 
