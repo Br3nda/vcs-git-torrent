@@ -1,6 +1,17 @@
 
 package VCS::Git::Torrent::PWP::Message::Choke;
 
+=head1 NAME
+
+VCS::Git::Torrent::PWP::Message::Choke
+
+=head2 DESCRIPTION
+
+Implements the Choke message from the RFC.
+L<http://gittorrent.utsl.gen.nz/rfc.html#anchor33>
+
+=cut
+
 use Moose;
 with "VCS::Git::Torrent::PWP::Message";
 use Carp;
