@@ -1,6 +1,12 @@
 
 package VCS::Git::Torrent::CommitReel::Index;
 
+=head1 NAME
+
+VCS::Git::Torrent::CommitReel::Index
+
+=cut
+
 use DB_File;
 use Moose;
 use Storable qw( freeze thaw );
@@ -21,6 +27,15 @@ has 'reel' =>
 	weak_ref => 1,
 	handles => [ 'git' ];
 
+=head2 open_index
+
+Open, and possibly create, the file that stores the commit reel index.
+DB_File in DB_BTREE mode is currently used, with a numeric sort to the keys,
+which are the offsets in the commit reel.  The values are frozen
+VCS::Git::Torrent::CommitReel::Entry objects; see L<Storable>.
+
+=cut
+
 sub open_index {
 	my $self = shift;
 	my %index;
@@ -36,6 +51,14 @@ sub open_index {
 
 	\%index;
 }
+
+=head2 update_index
+
+Update ourself to contain the latest entries from the commit reel.  This is
+done by calling L<reel_revlist_iter> and freezing (see L<Storable>) the
+resulting list into the index.
+
+=cut
 
 sub update_index {
 	my $self = shift;
@@ -59,6 +82,16 @@ sub update_index {
 		$self->index->{$rev->offset} = freeze $rev;
 	}
 }
+
+=head2 reel_revlist_iter() returns VCS::Git::Torrent::CommitReel::Entry
+
+Using the currently available references in the index, determine what other
+references are needed to bring us up to date.
+
+Commits are ordered according to the RFC.
+L<http://gittorrent.utsl.gen.nz/rfc.html#anchor15>
+
+=cut
 
 sub reel_revlist_iter {
 	my $self = shift;
