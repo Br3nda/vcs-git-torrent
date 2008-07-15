@@ -1,6 +1,18 @@
 
 package VCS::Git::Torrent::Peer::Async::Socket;
 
+=head1 NAME
+
+VCS::Git::Torrent::Peer::Async::Socket
+
+=head1 DESCRIPTION
+
+Network connection using L<Coro::Socket> (co-routines).
+
+Has a send_lock and a recv_lock which are L<Coro::RWLock>.
+
+=cut
+
 use Moose::Role;
 with 'VCS::Git::Torrent::Peer::Async::State';
 
