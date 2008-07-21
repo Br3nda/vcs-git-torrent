@@ -4,7 +4,7 @@ package t::TestUtils;
 
 use base qw(Exporter);
 BEGIN {
-	our @EXPORT = qw(mk_tmp_repo in_empty_repo tmp_git);
+	our @EXPORT = qw(mk_tmp_repo in_empty_repo tmp_git random_port_pair);
 }
 
 use File::Temp qw(tempdir);
@@ -30,6 +30,12 @@ sub in_empty_repo {
 use Git;
 sub tmp_git {
 	Git->repository(mk_tmp_repo);
+}
+
+# return an array ref of two unprivileged ports
+sub random_port_pair {
+	my $port = int(rand(2**16-1024-1)+1024);
+	[ $port, $port + 1 ];
 }
 
 1;
