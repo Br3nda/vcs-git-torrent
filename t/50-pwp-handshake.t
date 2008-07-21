@@ -11,8 +11,7 @@ BEGIN { use_ok("VCS::Git::Torrent::Peer::Async") }
 # In this test script, we will set up two peers and check that they
 # can successfully handshake, and disconnect gracefully.
 
-my $port_1 = int(rand(2**16-1024-1)+1024);
-my $port_2 = $port_1 + 1;
+my ($port_1, $port_2) = @{ random_port_pair() };
 
 my $dummy_torrent = VCS::Git::Torrent->new(repo_hash => "6549" x 10,
 					   git => tmp_git,
