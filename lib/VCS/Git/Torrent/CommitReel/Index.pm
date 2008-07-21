@@ -27,6 +27,13 @@ has 'reel' =>
 	weak_ref => 1,
 	handles => [ 'git' ];
 
+has 'cat_file' =>
+	isa => 'ArrayRef',
+	is => 'ro',
+	default => sub {
+		[ Git::command_bidi_pipe('cat-file', '--batch-check') ]
+	};
+
 =head2 open_index
 
 Open, and possibly create, the file that stores the commit reel index.
@@ -209,9 +216,15 @@ sub _commit_objects {
 	my $self = shift;
 	my $commitid = shift;
 
+	my $pipe_read = $self->cat_file->[1];
+	my $pipe_write = $self->cat_file->[2];
+
 	my $git = $self->git;
 
-	my $commit_size = $git->command(qw(cat-file -s), $commitid);
+	my $commit_size = do {
+		print $pipe_write $commitid . "\n";
+		(split(/ /, <$pipe_read>))[2];
+	};
 	my @deps = $git->command (qw(rev-list --objects), $commitid.'^!');
 
 	# the sort order in the RFC is quite specific - objects must
@@ -220,9 +233,10 @@ sub _commit_objects {
 	foreach my $d (sort { $a cmp $b } @deps) {
 		my ($d_hash, $d_what) = split /\s+/, $d, 2;
 		next if $d_hash eq $commitid;
-		my $d_size = $git->command ('cat-file', '-s', $d_hash);
-		my $d_type = $git->command ('cat-file', '-t', $d_hash);
-		chomp($d_type);
+		my (undef, $d_type, $d_size) = do {
+			print $pipe_write $d_hash . "\n";
+			split(/ /, <$pipe_read>);
+		};
 		push @x, [ $d_hash, $d_size, $d_type, $d_what ];
 	}
 
