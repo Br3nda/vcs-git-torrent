@@ -227,18 +227,37 @@ sub _commit_objects {
 	};
 	my @deps = $git->command (qw(rev-list --objects), $commitid.'^!');
 
+	# get information for all the objects between these two commits;
+	# use git-cat-file --batch-check, asynchronously.
+	my @x;
+	my $x_item = 0;
+	my $flush_pipe = sub {
+		while ($x[$x_item] and
+		       defined(my $line = <$pipe_read>)) {
+			my $x = $x[$x_item++];
+			(undef, $x->[2], $x->[1]) = split(/ /, $line);
+		}
+	};
+
+	$pipe_write->autoflush(0);
+	$pipe_read->blocking(0);
+
 	# the sort order in the RFC is quite specific - objects must
 	# have the objects they refer to come first.
-	my @x;
 	foreach my $d (sort { $a cmp $b } @deps) {
 		my ($d_hash, $d_what) = split /\s+/, $d, 2;
 		next if $d_hash eq $commitid;
-		my (undef, $d_type, $d_size) = do {
-			print $pipe_write $d_hash . "\n";
-			split(/ /, <$pipe_read>);
-		};
-		push @x, [ $d_hash, $d_size, $d_type, $d_what ];
+		print $pipe_write $d_hash . "\n";
+		push @x, [ $d_hash, undef, undef, $d_what ];
+
+		# more than 42 or so answers backed up might end up
+		# with us getting SIGPIPE
+		$flush_pipe->() if (@x - $x_item > 42);
 	}
+
+	$pipe_write->autoflush(1);
+	$pipe_read->blocking(1);
+	$flush_pipe->();
 
 	my @rfc_ordered;
 
