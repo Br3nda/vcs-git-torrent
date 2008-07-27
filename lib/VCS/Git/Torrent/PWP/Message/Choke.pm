@@ -8,7 +8,7 @@ VCS::Git::Torrent::PWP::Message::Choke
 =head2 DESCRIPTION
 
 Implements the Choke message from the RFC.
-L<http://gittorrent.utsl.gen.nz/rfc.html#anchor33>
+L<http://gittorrent.utsl.gen.nz/rfc.html#pwp-choke>
 
 =cut
 

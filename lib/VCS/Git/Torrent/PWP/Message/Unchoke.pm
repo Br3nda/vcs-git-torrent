@@ -8,7 +8,7 @@ VCS::Git::Torrent::PWP::Message::Unchoke
 =head2 DESCRIPTION
 
 Implements the Unchoke message from the RFC.
-L<http://gittorrent.utsl.gen.nz/rfc.html#anchor34>
+L<http://gittorrent.utsl.gen.nz/rfc.html#pwp-unchoke>
 
 =cut
 

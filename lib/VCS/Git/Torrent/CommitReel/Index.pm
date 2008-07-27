@@ -96,7 +96,7 @@ Using the currently available references in the index, determine what other
 references are needed to bring us up to date.
 
 Commits are ordered according to the RFC.
-L<http://gittorrent.utsl.gen.nz/rfc.html#anchor15>
+L<http://gittorrent.utsl.gen.nz/rfc.html#org-reels>
 
 =cut
 
