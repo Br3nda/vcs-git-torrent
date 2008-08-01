@@ -108,7 +108,24 @@ sub pack {
 	return wantarray ? @rv : join "", @rv;
 }
 
-requires 'payload';
+has 'payload' =>
+	is => "rw",
+	required => 1,
+	lazy => 1,
+	trigger => sub {
+		my $self = shift;
+		$self->unpack_payload($self->payload)
+			unless $self->{_packed};
+	},
+	default => sub {
+		my $self = shift;
+		$self->{_packed} = 1;
+		$self->pack_payload;
+	};
+
+requires 'pack_payload';
+requires 'unpack_payload';
+
 requires 'args';
 
 =head2 create_io($io)

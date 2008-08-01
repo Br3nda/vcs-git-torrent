@@ -16,7 +16,9 @@ use Moose;
 with "VCS::Git::Torrent::PWP::Message";
 use Carp;
 
-sub payload { }
+sub pack_payload { }
+sub unpack_payload { }
+
 sub args {
 	my $class = shift;
 	croak("Unchoke has no arguments") if @_;
