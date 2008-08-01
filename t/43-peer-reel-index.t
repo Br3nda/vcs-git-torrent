@@ -59,7 +59,13 @@ my $fail = sub {
 	push @{ $fail{$category}||= [] }, [ $o1, $o2 ];
 };
 
+my $cue = $first_obj->size;
 while ( my $o = $reel_iter->() ) {
+
+	if ( $o->offset != $cue ) {
+		$fail->("cue", $o->offset, $cue);
+	}
+	$cue += $o->size;
 
 	if ( exists $offset{$o->objectid} ) {
 		fail("object seen repeated");
@@ -143,9 +149,11 @@ while ( my $o = $reel_iter->() ) {
 	}
 }
 
-for my $category ( qw(dependency sha1 order date) ) {
+for my $category ( qw(dependency sha1 order date cue) ) {
 	my $test_name =
-		"objects in correct order according to $category rule";
+		($category ne "cue"
+		 ? "objects in correct order according to $category rule"
+		 : "offsets correct");
 
 	if ( exists $fail{$category} ) {
 		fail($test_name);
@@ -154,7 +162,12 @@ for my $category ( qw(dependency sha1 order date) ) {
 			my ($o1, $o2) = map {
 				substr(ref($_)?$_->objectid:$_, 0, 16)
 			} @{ $failure };
-			diag("$o1 seen after $o2");
+			if ( $category eq "cue" ) {
+				diag("object at offset $o1, running offset was $o2");
+			}
+			else {
+				diag("$o1 seen after $o2");
+			}
 		}
 	}
 	else {
