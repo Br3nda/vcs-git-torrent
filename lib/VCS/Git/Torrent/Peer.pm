@@ -144,6 +144,16 @@ has 'connections' =>
 	is  => "ro",
 	default => sub { [] };
 
+=head2 reels
+
+Returns an array ref of reels known to this peer
+
+=cut
+
+has 'reels' =>
+	isa => 'ArrayRef[VCS::Git::Torrent::CommitReel]',
+	is => "rw";
+
 1;
 
 =head1 SEE ALSO
