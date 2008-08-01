@@ -292,4 +292,23 @@ sub _commit_objects {
 	@rfc_ordered;
 }
 
+=head2 size() returns Int
+
+Returns the total length of the reel
+
+=cut
+
+sub size {
+	my $self = shift;
+
+	my ($key, $val);
+	if ( ! $self->{db}->seq($key, $val, R_LAST) ) {
+		$self->update_index;
+		$self->{db}->seq($key, $val, R_LAST);
+	}
+
+	my $last = thaw $val;
+	$last->offset + $last->size;
+}
+
 1;

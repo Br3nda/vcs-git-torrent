@@ -36,6 +36,7 @@ has 'end' =>
 has 'index' =>
 	isa => "VCS::Git::Torrent::CommitReel::Index",
 	is => "ro",
+	handles => [ qw(size) ],
 	default => sub {
 		VCS::Git::Torrent::CommitReel::Index->new(),
 	};

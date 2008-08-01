@@ -175,6 +175,8 @@ for my $category ( qw(dependency sha1 order date cue) ) {
 	}
 }
 
+is($reel->size, $cue, "Reel knows its size");
+
 my ($all, $ctx) = $git->command_output_pipe
 	("rev-list", "--objects", "--reverse", $TEST_COMMIT);
 
