@@ -88,7 +88,7 @@ use constant GTP_PWP_PROTO_NAME => "GTP/0.1";
 
 use Sub::Exporter -setup =>
 	{ exports =>
-	  [ qw(pwp_message pwp_decode unpack_hex pack_hex),
+	  [ qw(pwp_message pwp_decode unpack_hex pack_hex pack_num unpack_num),
 	    grep { m{^GTP_PWP_} } keys %{__PACKAGE__."::"},
 	  ],
 	  groups =>
@@ -115,6 +115,27 @@ sub pack_hex {
 
 sub unpack_hex {
 	join("", map { sprintf("%.2x", $_) } unpack("C*", $_[0]));
+}
+
+=head2 pack_num
+
+=head2 unpack_num
+
+Wrappers to pack and unpack numbers to and from network-order, 32-bit
+integers.
+
+=cut
+
+sub pack_num {
+	my $num = shift;
+	croak "can't pack $num" unless int($num) == $num and $num >= 0 and $num < 2**32;
+	pack("N", $num);
+}
+
+sub unpack_num {
+	my $num_quad = shift;
+	croak "bad input to unpack_num" unless length($num_quad) == 4;
+	(unpack("N", $num_quad))[0];
 }
 
 =head2 pwp_message
