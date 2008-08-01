@@ -85,9 +85,7 @@ sub update_index {
 
 	my $iter = $self->reel_revlist_iter;
 
-	while ( my $rev = $iter->() ) {
-		$self->index->{$rev->offset} = freeze $rev;
-	}
+	1 while $iter->();
 }
 
 =head2 reel_revlist_iter() returns VCS::Git::Torrent::CommitReel::Entry
@@ -206,6 +204,7 @@ sub reel_revlist_iter {
 
 		$offset += $rev->size;
 
+		$self->index->{$offset} = freeze $rev;
 		return $rev;
 	};
 
