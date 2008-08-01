@@ -64,4 +64,27 @@ sub reel_id {
 	  $self->end->tag_id ];
 }
 
+package VCS::Git::Torrent::CommitReel::Remote;
+use Moose;
+# this is a bit of a hack; it should be a role, that CommitReel::Local
+# consumes.
+extends 'VCS::Git::Torrent::CommitReel';
+
+has '+index' =>
+	default => undef;
+
+# also, this union type here makes using this object class problematic;
+# the 'reference' should also have this behaviour of being allowed to
+# be a proxy object.
+has '+start' =>
+	isa => "VCS::Git::Torrent::Reference|VCS::Git::Torrent::sha1_hex";
+has '+end' =>
+	isa => "VCS::Git::Torrent::Reference|VCS::Git::Torrent::sha1_hex";
+
+# this will complain about there already being a 'size' method...
+has 'size' =>
+	isa => "Int",
+	is => "ro",
+	required => 1;
+
 1;
