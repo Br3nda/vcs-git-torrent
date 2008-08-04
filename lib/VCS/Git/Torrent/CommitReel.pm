@@ -72,9 +72,6 @@ use Moose;
 # consumes.
 extends 'VCS::Git::Torrent::CommitReel';
 
-has '+index' =>
-	default => undef;
-
 # also, this union type here makes using this object class problematic;
 # the 'reference' should also have this behaviour of being allowed to
 # be a proxy object.
@@ -88,5 +85,8 @@ has 'size' =>
 	isa => "Int",
 	is => "ro",
 	required => 1;
+
+has '+torrent' =>
+	required => 0;
 
 1;
