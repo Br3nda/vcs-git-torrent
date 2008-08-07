@@ -98,20 +98,6 @@ resulting list into the index.
 
 sub update_index {
 	my $self = shift;
-	my ($key, $val);
-	my $last_sha1;
-	my @revlist;
-	my $rev;
-	my $offset;
-
-	if ( $self->{db}->seq($key, $val, R_LAST) ) { # assume empty
-		$last_sha1 = undef;
-	}
-	else {
-		my $last_entry = thaw $val;
-		$last_sha1 = $last_entry->objectid;
-	}
-
 	my $iter = $self->reel_revlist_iter;
 
 	1 while $iter->();
@@ -334,7 +320,7 @@ sub size {
 	$self->open_index unless $self->{db};
 
 	my ($key, $val);
-	if ( ! $self->{db}->seq($key, $val, R_LAST) ) {
+	if ( $self->{db}->seq($key, $val, R_LAST) ) {
 		$self->update_index;
 		$self->{db}->seq($key, $val, R_LAST);
 	}
