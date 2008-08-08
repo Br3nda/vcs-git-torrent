@@ -43,7 +43,7 @@ has 'reel' =>
 	weak_ref => 1,
 	handles => [ 'git', 'plumb', "state_dir" ];
 
-has 'cat_file' =>
+has 'cat_file_info' =>
 	isa => 'ArrayRef',
 	is => 'ro',
 	lazy => 1,
@@ -230,8 +230,8 @@ sub _commit_objects {
 	my $self = shift;
 	my $commitid = shift;
 
-	my $pipe_read = $self->cat_file->[0];
-	my $pipe_write = $self->cat_file->[1];
+	my $pipe_read = $self->cat_file_info->[0];
+	my $pipe_write = $self->cat_file_info->[1];
 	$pipe_write->autoflush(1);
 
 	my $git = $self->git;

@@ -220,6 +220,14 @@ has 'trackers' =>
 	#required => 1,
 	is  => "rw";
 
+# keep this cat-file around for all object reading
+has 'cat_file' =>
+	isa => 'ArrayRef',
+	is => 'ro',
+	default => sub {
+		[ Git::command_bidi_pipe('cat-file', '--batch') ]
+	};
+
 =head2 marshall() returns HashRef
 
 Return a reference to a data structure suitable for bencoding, or for

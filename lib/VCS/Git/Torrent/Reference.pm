@@ -44,7 +44,7 @@ has 'torrent' =>
 	weak_ref => 1,
 	required => 1,
 	isa => "VCS::Git::Torrent",
-	handles => [ "git", "repo_hash", "plumb" ];
+	handles => [ "git", "repo_hash", "plumb", "cat_file" ];
 
 use IO::Plumbing qw(bucket);
 use Carp;
