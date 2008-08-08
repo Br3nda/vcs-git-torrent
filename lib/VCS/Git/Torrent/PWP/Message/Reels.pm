@@ -66,7 +66,7 @@ sub unpack_payload {
 
 		$args{'size'} = $size;
 		push @reels,
-			VCS::Git::Torrent::CommitReel::Remote->new(%args);
+			VCS::Git::Torrent::CommitReel->new(%args);
 	}
 
 	$self->reels(\@reels);

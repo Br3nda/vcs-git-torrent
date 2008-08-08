@@ -10,7 +10,7 @@ BEGIN {
 	use_ok('Coro');
 	use_ok('Coro::Event');
 	use_ok('VCS::Git::Torrent');
-	use_ok('VCS::Git::Torrent::CommitReel');
+	use_ok('VCS::Git::Torrent::CommitReel::Local');
 	use_ok('VCS::Git::Torrent::Peer::Async');
 	use_ok('VCS::Git::Torrent::PWP', qw(:pwp_constants));
 }
@@ -41,7 +41,7 @@ my $reference = VCS::Git::Torrent::Reference->new(
 );
 ok($reference, 'Reference created');
 
-my $reel = VCS::Git::Torrent::CommitReel->new(
+my $reel = VCS::Git::Torrent::CommitReel::Local->new(
 	torrent => $torrent,
 	end => $reference,
 );

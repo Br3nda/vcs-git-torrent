@@ -7,7 +7,7 @@ use t::TestUtils;
 use VCS::Git::Torrent;
 use List::Util qw(first max);
 
-BEGIN { use_ok('VCS::Git::Torrent::CommitReel') }
+BEGIN { use_ok('VCS::Git::Torrent::CommitReel::Local') }
 
 # This test script tests the "VCS::Git::Torrent::CommitReel::Index"
 # module
@@ -30,8 +30,8 @@ my $reference = VCS::Git::Torrent::Reference->new
 	  torrent => $dummy_torrent,
 	  refs => { "refs/heads/master" => $TEST_COMMIT } );
 
-my $reel = VCS::Git::Torrent::CommitReel->new
-	( end => $reference,
+my $reel = VCS::Git::Torrent::CommitReel::Local->new
+	( end => $reference
 	  torrent => $dummy_torrent,
 	);
 
