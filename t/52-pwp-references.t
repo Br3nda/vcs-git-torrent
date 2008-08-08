@@ -21,8 +21,7 @@ BEGIN {
 }
 
 my $path = mk_tmp_repo();
-$ENV{'GIT_WORK_TREE'} = $path;
-my $git = Git->repository();
+my $git = Git->repository($ENV{PWD} . '/' . $path);
 ok($git, 'git repo created');
 
 my $t = VCS::Git::Torrent->new(
@@ -32,7 +31,9 @@ my $t = VCS::Git::Torrent->new(
 ok($t, 'gittorrent created');
 
 qx(echo foo >> $path/bar);
-my $sha1 = $git->hash_and_insert_object("$path/bar");
+$git->command('add', 'bar');
+$git->command('commit', '-a', '-m baz');
+my $sha1 = $git->command_oneline('show-ref', '-s', 'master');
 like($sha1, qr/[[:xdigit:]]{40}/, 'object inserted successfully');
 
 my $ref = VCS::Git::Torrent::Reference->new(
