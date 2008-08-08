@@ -42,7 +42,7 @@ use MooseX::TimestampTZ qw(offset_s epochtz zone);
 has 'torrent' =>
 	is => "rw",
 	weak_ref => 1,
-	required => 1,
+	required => 0,
 	isa => "VCS::Git::Torrent",
 	handles => [ "git", "repo_hash", "plumb", "cat_file" ];
 

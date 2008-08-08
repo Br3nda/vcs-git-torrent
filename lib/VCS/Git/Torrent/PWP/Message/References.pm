@@ -55,7 +55,21 @@ sub pack_payload {
 
 sub unpack_payload {
 	my $self = shift;
+	my $payload = shift;
 	my @references;
+	my ($ref_sha1, $ref_size, $ref_blob);
+
+	while ( length($payload) ) {
+		$ref_sha1 = unpack_hex(substr($payload, 0, 20));
+		$ref_size = unpack_num(substr($payload, 20, 4));
+		die 'invalid size' if ( 24 + $ref_size > length($payload) );
+		$ref_blob = substr($payload, 24, $ref_size);
+
+		substr($payload, 0, 24 + $ref_size) = '';
+
+		# FIXME, we need an object writer, hash the received obj and set tag_id
+		push @references, VCS::Git::Torrent::Reference->new();
+	}
 
 	$self->references(\@references);
 }

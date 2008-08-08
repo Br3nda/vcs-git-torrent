@@ -74,3 +74,6 @@ $peer_1->send_message($victim, GTP_PWP_REFERENCES);
 
 Coro::Event::sweep;
 cede;
+
+Coro::Event::loop(1);
+
