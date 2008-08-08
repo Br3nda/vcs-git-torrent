@@ -154,6 +154,10 @@ has 'reels' =>
 	isa => 'ArrayRef[VCS::Git::Torrent::CommitReel]',
 	is => "rw";
 
+has 'references' =>
+	isa => 'ArrayRef[VCS::Git::Torrent::Reference]',
+	is => 'rw';
+
 1;
 
 =head1 SEE ALSO
