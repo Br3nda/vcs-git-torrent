@@ -32,4 +32,7 @@ sub BUILD {
 	$self->index->reel($self);
 }
 
+has '+torrent' =>
+	required => 1;
+
 1;

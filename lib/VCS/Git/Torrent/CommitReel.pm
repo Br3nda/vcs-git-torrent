@@ -21,7 +21,7 @@ has 'torrent' =>
 	isa => "VCS::Git::Torrent",
 	is => "rw",
 	weak_ref => 1,
-	required => 1,
+	required => 0,
 	handles => [ 'git', 'plumb', "state_dir" ];
 
 has 'start' =>

@@ -31,7 +31,7 @@ my $reference = VCS::Git::Torrent::Reference->new
 	  refs => { "refs/heads/master" => $TEST_COMMIT } );
 
 my $reel = VCS::Git::Torrent::CommitReel::Local->new
-	( end => $reference
+	( end => $reference,
 	  torrent => $dummy_torrent,
 	);
 
