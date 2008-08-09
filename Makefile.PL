@@ -22,6 +22,7 @@ if ($@) {
 }
 else {
 	my $git_version = Git::command_oneline("version");
+	$git_version =~ s{.*?(\d)}{$1};
 	my @version_parts = map { 0+$_ } split /\./, $git_version;
 	my $mul = 1;
 	my $version;
