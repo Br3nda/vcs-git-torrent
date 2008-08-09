@@ -53,10 +53,13 @@ sub pack_payload {
 	$payload;
 }
 
+# temporary variable for the time between unpack_payload and action
+# we need a Git object which unpack_payload doesn't have access to
+my $temp_refs;
+
 sub unpack_payload {
 	my $self = shift;
 	my $payload = shift;
-	my @references;
 	my ($ref_sha1, $ref_size, $ref_blob);
 
 	while ( length($payload) ) {
@@ -67,11 +70,8 @@ sub unpack_payload {
 
 		substr($payload, 0, 24 + $ref_size) = '';
 
-		# FIXME, we need an object writer, hash the received obj and set tag_id
-		push @references, VCS::Git::Torrent::Reference->new();
+		push @{ $temp_refs }, [ $ref_sha1, $ref_size, $ref_blob ];
 	}
-
-	$self->references(\@references);
 }
 
 sub args {
@@ -93,14 +93,37 @@ sub action {
 	my $local_peer = shift;
 	my $connection = shift;
 
-	if ( @{ $self->references } ) {
-		$connection->remote->references($self->references);
+	if ( $temp_refs ) { # we got some references from a peer
+		my @references;
+
+		foreach(@{$temp_refs}) {
+			my ($ref_sha1, $ref_size, $ref_blob) = @{ $_ };
+
+			my $plumb = $local_peer->torrent->plumb
+			    ( [ "hash-object", 
+				'-w', '--stdin', '-t', 'tag' ],
+			    );
+			$plumb->input(sub { print $ref_blob });
+			$plumb->execute;
+			my $o_sha1 = $plumb->output->contents;
+
+			chomp($o_sha1);
+			die 'invalid Reference hash'
+				unless ( $o_sha1 eq $ref_sha1 );
+
+			push @references, VCS::Git::Torrent::Reference->new(
+				torrent => $local_peer->torrent,
+				tag_id => $ref_sha1,
+			);
+		}
+
+		$connection->remote->references(\@references);
 	}
 	else { # it's a request for our references
 		$local_peer->send_message(
 			$connection->remote, GTP_PWP_REFERENCES,
 			$local_peer->torrent->references
-		);
+		) if ( @{ $local_peer->torrent->references } );
 	}
 }
 

@@ -42,7 +42,7 @@ my $ref = VCS::Git::Torrent::Reference->new(
 	refs => { 'HEAD' => $sha1 },
 	tagger => 'Elanour Rigby <nowhereman@example.com>',
 	tagdate => timestamptz,
-	comment => "Oh, look at all the lonely people",
+	comment => "Ah, look at all the lonely people\n",
 );
 ok($ref, 'Reference created');
 
@@ -57,9 +57,17 @@ my $peer_1 = VCS::Git::Torrent::Peer::Async->new(
 );
 ok($peer_1, 'Peer created');
 
+my $path2 = mk_tmp_repo();
+my $git2 = Git->repository($ENV{PWD} . '/' . $path2);
+my $t2 = VCS::Git::Torrent->new(
+	repo_hash => '501d' x 10,
+	git => $git2,
+);
+
 my $peer_2 = VCS::Git::Torrent::Peer::Async->new(
 	port => $port_2,
 	torrent => $t,
+	#torrent => $t2,  # this should also work...
 	peer_id => 'BravoPeer2BravoPeer2',
 );
 ok($peer_2, 'Another peer created');
@@ -76,4 +84,12 @@ Coro::Event::sweep;
 cede;
 
 Coro::Event::loop(1);
+
+for my $attr ( qw(tag_id tagged_object tagger tagdate comment refs) ) {
+	is_deeply(
+		$victim->references->[0]->$attr,
+		$ref->$attr,
+		'reconstructed Reference: ' . $attr . ' matches'
+	       );
+}
 
