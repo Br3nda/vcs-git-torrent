@@ -220,12 +220,24 @@ has 'trackers' =>
 	#required => 1,
 	is  => "rw";
 
+use IO::Plumbing qw(hose);
+
 # keep this cat-file around for all object reading
 has 'cat_file' =>
 	isa => 'ArrayRef',
 	is => 'ro',
+	lazy => 1,
 	default => sub {
-		[ Git::command_bidi_pipe('cat-file', '--batch') ]
+		my $self = shift;
+		my $rdr = hose;
+		my $wtr = hose;
+		my $plumb = $self->plumb
+			([ "cat-file", "--batch" ],
+			 input => $wtr,
+			 output => $rdr,
+			);
+		$plumb->execute;
+		[ $plumb->pid, $rdr->in_fh, $wtr->out_fh, $plumb ];
 	};
 
 =head2 marshall() returns HashRef
@@ -253,7 +265,6 @@ sub marshall {
 	\%marshalled;
 }
 
-use IO::Plumbing ();
 use Git;
 has 'git' =>
 	isa => 'Git',
@@ -276,15 +287,17 @@ has 'state_dir' =>
 
 sub _git_plumb_args {
 	my $self = shift;
+	my $git = $self->git;
+	confess "no git" unless $git;
 	@{ $self->{_git_args} ||= do {
 		#my %env = %ENV;
 		#$env{GIT_DIR} = $self->git->repo_path;
-		my $path = $self->git->wc_path;
-		if (my $subdir = $self->git->wc_subdir) {
+		my $path = $git->wc_path;
+		if (my $subdir = $git->wc_subdir) {
 			$path .= "/" . $subdir;
 		}
 		[ cwd => $path,
-		  env => { GIT_DIR => $self->git->repo_path },
+		  env => { GIT_DIR => $git->repo_path },
 		 ];
 	} };
 }

@@ -36,6 +36,7 @@ sub pack_payload {
 		$pipe_write = $reference->cat_file->[2];
 
 		print $pipe_write $reference->tag_id . "\n";
+		$pipe_write->flush();
 
 		(undef, $ref_type, $ref_size) = split(/\s/, <$pipe_read>);
 		die 'Reference tag_id does not exist in git repo?'
