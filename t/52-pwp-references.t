@@ -21,7 +21,7 @@ BEGIN {
 }
 
 my $path = mk_tmp_repo();
-my $git = Git->repository($ENV{PWD} . '/' . $path);
+my $git = Git->repository($path);
 ok($git, 'git repo created');
 
 my $t = VCS::Git::Torrent->new(
@@ -58,7 +58,7 @@ my $peer_1 = VCS::Git::Torrent::Peer::Async->new(
 ok($peer_1, 'Peer created');
 
 my $path2 = mk_tmp_repo();
-my $git2 = Git->repository($ENV{PWD} . '/' . $path2);
+my $git2 = Git->repository($path2);
 my $t2 = VCS::Git::Torrent->new(
 	repo_hash => '501d' x 10,
 	git => $git2,

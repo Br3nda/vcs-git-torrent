@@ -28,13 +28,14 @@ BEGIN {
 	unless $ENV{NO_WARNING_TRACES};
 }
 
+use Cwd qw(fast_abs_path);
 use File::Temp qw(tempdir);
 
 sub mk_tmp_repo {
 	my $temp_dir = tempdir( "t/tmpXXXXX", CLEANUP => 1 );
 	system("cd $temp_dir; git-init >/dev/null 2>&1") == 0
 		or die "git-init failed; rc=$?";
-	$temp_dir;
+	fast_abs_path($temp_dir);
 }
 
 use Cwd;

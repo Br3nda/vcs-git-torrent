@@ -11,8 +11,7 @@ BEGIN { use_ok('VCS::Git::Torrent') }
 BEGIN { use_ok('VCS::Git::Torrent::Reference') }
 
 my $path = mk_tmp_repo();
-chdir($path);
-my $repo = Git->repository();
+my $repo = Git->repository($path);
 my $tag_id = $repo->command('hash-object', '-w', '-t', 'tag', '../41-peer-references/01-simple.tag');
 chomp $tag_id;
 
