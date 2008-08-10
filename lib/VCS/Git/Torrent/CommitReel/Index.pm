@@ -10,6 +10,7 @@ VCS::Git::Torrent::CommitReel::Index
 use DB_File;
 use Moose;
 use Storable qw( freeze thaw );
+use IO::Plumbing qw(hose);
 
 use VCS::Git::Torrent::CommitReel::Entry;
 
@@ -25,13 +26,25 @@ has 'reel' =>
 	isa => "VCS::Git::Torrent::CommitReel",
 	is => "rw",
 	weak_ref => 1,
-	handles => [ 'git' ];
+	handles => [ 'git', 'plumb' ];
 
 has 'cat_file' =>
 	isa => 'ArrayRef',
 	is => 'ro',
+	lazy => 1,
+	required => 1,
 	default => sub {
-		[ Git::command_bidi_pipe('cat-file', '--batch-check') ]
+		my $self = shift;
+		# yeah, this API could use a little simplification :)
+		my $rdr = hose;
+		my $wtr = hose;
+		my $plumb = $self->plumb
+			([ "cat-file", "--batch-check" ],
+			 input => $wtr,
+			 output => $rdr,
+			);
+		$plumb->execute;
+		[ $rdr->in_fh, $wtr->out_fh, $plumb ];
 	};
 
 =head2 open_index
@@ -215,8 +228,9 @@ sub _commit_objects {
 	my $self = shift;
 	my $commitid = shift;
 
-	my $pipe_read = $self->cat_file->[1];
-	my $pipe_write = $self->cat_file->[2];
+	my $pipe_read = $self->cat_file->[0];
+	my $pipe_write = $self->cat_file->[1];
+	$pipe_write->autoflush(1);
 
 	my $git = $self->git;
 

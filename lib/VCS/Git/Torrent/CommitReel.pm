@@ -22,7 +22,7 @@ has 'torrent' =>
 	is => "rw",
 	weak_ref => 1,
 	required => 1,
-	handles => [ 'git' ];
+	handles => [ 'git', 'plumb' ];
 
 has 'start' =>
 	isa => "VCS::Git::Torrent::Reference",

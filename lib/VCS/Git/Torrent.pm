@@ -245,11 +245,37 @@ sub marshall {
 	\%marshalled;
 }
 
+use IO::Plumbing ();
 use Git;
 has 'git' =>
 	isa => 'Git',
 	is  => 'ro',
 	required => 1;
+
+sub _git_plumb_args {
+	my $self = shift;
+	@{ $self->{_git_args} ||= do {
+		#my %env = %ENV;
+		#$env{GIT_DIR} = $self->git->repo_path;
+		my $path = $self->git->wc_path;
+		if (my $subdir = $self->git->wc_subdir) {
+			$path .= "/" . $subdir;
+		}
+		[ cwd => $path,
+		  env => { GIT_DIR => $self->git->repo_path },
+		 ];
+	} };
+}
+
+sub plumb {
+	my $self = shift;
+	my $args = shift;
+	IO::Plumbing->new
+		  ( program => "git", $self->_git_plumb_args,
+		    args => $args,
+		    @_
+		   );
+}
 
 =head1 EXPORTS
 
