@@ -33,7 +33,8 @@ repository reference list encapsulated in a git tag.
 
 use Moose;
 use VCS::Git::Torrent;
-use MooseX::TimestampTZ;
+use MooseX::Timestamp qw(timestamp);
+use MooseX::TimestampTZ qw(offset_s);
 
 has 'torrent' =>
 	is => "rw",
@@ -157,6 +158,12 @@ sub buildTagDate {
 				(undef, undef, $time) = $self->git->ident($1);
 				last;
 			}
+		}
+
+		if (my ($epoch, $offset) = ($time =~ m{(\d+)\s*([+\-]\d+)})) {
+			my $offset_s = offset_s($offset);
+			$epoch += $offset;
+			$time = timestamp($epoch).$offset;
 		}
 	}
 

@@ -29,7 +29,7 @@ my $ref = VCS::Git::Torrent::Reference->new(
 is($ref->tag_id, $tag_id, 'tag_id matches');
 is($ref->tagged_object, '5e8f6a7807a378259daa3b91314c8c9775fa160e', 'tagged_object matches');
 is($ref->tagger, 'Sam Vilain <sam@vilain.net>', 'tagger matches');
-is($ref->tagdate, '1215919513 +1200', 'tagdate matches');
+is($ref->tagdate, '2008-07-13 15:45:13+1200', 'tagdate matches');
 is($ref->comment, '01-simple', 'comment matches');
 
 #foreach(keys(%{$ref->refs})) {
