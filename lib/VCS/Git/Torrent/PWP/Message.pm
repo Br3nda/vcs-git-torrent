@@ -56,10 +56,7 @@ BEGIN {
 		my $class = __PACKAGE__."::".ucfirst($t);
 		push @TYPE_CLASS, $class;
 		$CLASS_TYPE{$class} = $i;
-		push @classes, $class;
 	}
-	require Class::Autouse;
-	eval { Class::Autouse->import(@classes) };
 
 	constant->import(\%constants);
 }
@@ -184,11 +181,18 @@ Create a PWP message to send over the network.
 
 =cut
 
+sub _require {
+	my $class = shift;
+	$class =~ s{::}{/}g;
+	$class .= ".pm";
+	require $class unless exists $INC{$class};
+}
+
 sub create {
 	my $class = (shift)->class_for(shift);
 	confess "wth?" unless $class;
-	Class::Autouse->autouse($class)
-			unless $LOADED{$class}++;
+	_require $class
+		unless $LOADED{$class}++;
 
 	$class->new( $class->args(@_) );
 }
