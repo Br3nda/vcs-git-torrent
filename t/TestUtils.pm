@@ -2,9 +2,22 @@
 
 package t::TestUtils;
 
+use Carp;
 use base qw(Exporter);
 BEGIN {
 	our @EXPORT = qw(mk_tmp_repo in_empty_repo tmp_git random_port_pair);
+	$SIG{__WARN__} = sub {
+	    my $culprit = caller;
+	    if ($culprit =~ m{Class::C3}) {
+		return 1;
+	    }
+	    else {
+		print STDERR "*** WARNING FROM $culprit FOLLOWS ***\n";
+	    }
+	    Carp::cluck(@_);
+	    print STDERR "*** END OF STACK DUMP ***\n";
+	    1
+	};
 }
 
 use File::Temp qw(tempdir);
