@@ -24,7 +24,8 @@ BEGIN {
 	    Carp::cluck(@_);
 	    print STDERR "*** END OF STACK DUMP ***\n";
 	    1
-	};
+	}
+	unless $ENV{NO_WARNING_TRACES};
 }
 
 use File::Temp qw(tempdir);
