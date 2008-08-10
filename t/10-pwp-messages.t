@@ -8,6 +8,8 @@ use Test::Depends qw(VCS::Git::Torrent::PWP::Message);
 
 use Test::More qw(no_plan);
 
+BEGIN { use_ok('VCS::Git::Torrent::PWP::Message::Choke') }
+
 use_ok("VCS::Git::Torrent::PWP" => "-pwp_constants");
 
 ok(defined &GTP_PWP_CHOKE, "imported constants");
