@@ -250,7 +250,21 @@ use Git;
 has 'git' =>
 	isa => 'Git',
 	is  => 'ro',
-	required => 1;
+	required => 1,
+	trigger => sub {
+		my $self = shift;
+		my $git_dir = $self->git->repo_path;
+		my $state_dir = "$git_dir/gittorrent";
+		if ( ! -d $state_dir ) {
+			mkdir $state_dir
+				or die "failed to make $state_dir; $!";
+		}
+		$self->state_dir($state_dir);
+	};
+
+has 'state_dir' =>
+	isa => "Str",
+	is => "rw";
 
 sub _git_plumb_args {
 	my $self = shift;
