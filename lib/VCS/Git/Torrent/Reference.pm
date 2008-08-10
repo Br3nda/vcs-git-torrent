@@ -39,6 +39,7 @@ use MooseX::TimestampTZ qw(offset_s);
 has 'torrent' =>
 	is => "rw",
 	weak_ref => 1,
+	required => 1,
 	isa => "VCS::Git::Torrent",
 	handles => [ "git", "repo_hash" ];
 

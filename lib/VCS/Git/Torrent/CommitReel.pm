@@ -21,6 +21,7 @@ has 'torrent' =>
 	isa => "VCS::Git::Torrent",
 	is => "rw",
 	weak_ref => 1,
+	required => 1,
 	handles => [ 'git' ];
 
 has 'start' =>
@@ -38,7 +39,8 @@ has 'index' =>
 	is => "ro",
 	handles => [ qw(size) ],
 	default => sub {
-		VCS::Git::Torrent::CommitReel::Index->new(),
+		my $self = shift;
+		VCS::Git::Torrent::CommitReel::Index->new( reel => $self ),
 	};
 
 # make sure the index has a reference to us

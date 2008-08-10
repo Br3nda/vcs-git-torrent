@@ -27,12 +27,13 @@ my $reference = VCS::Git::Torrent::Reference->new
 	( tagged_object => "0"x40,
 	  tagger => "R.U. Interested <whoever\@example.com>",
 	  comment => "",
+	  torrent => $dummy_torrent,
 	  refs => { "refs/heads/master" => $TEST_COMMIT } );
 
 my $reel = VCS::Git::Torrent::CommitReel->new
-	( end => $reference
+	( end => $reference,
+	  torrent => $dummy_torrent,
 	);
-$reel->torrent($dummy_torrent);
 
 ok($reel, "made the reel OK");
 
