@@ -41,6 +41,12 @@ my $reel_index = $reel->index;
 
 ok($reel_index, 'Index was created automatically');
 
+my $index_file = $reel_index->index_filename;
+if ( -e $index_file ) {
+	unlink($index_file)
+		or warn("failed to remove $index_file; $!");
+}
+
 my $reel_iter = $reel_index->reel_revlist_iter;
 
 my $first_obj = $reel_iter->();

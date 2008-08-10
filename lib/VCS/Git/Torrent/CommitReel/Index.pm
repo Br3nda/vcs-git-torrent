@@ -17,16 +17,31 @@ use VCS::Git::Torrent::CommitReel::Entry;
 has 'index' =>
 	isa => 'HashRef',
 	is  => 'rw',
+	lazy => 1,
+	required => 1,
 	default => sub {
 		my $self = shift;
 		$self->open_index;
+	};
+
+has 'index_filename' =>
+	isa => "Str",
+	is => "ro",
+	lazy => 1,
+	required => 1,
+	default => sub {
+		my $self = shift;
+		my (@pair_sha1) = @{ $self->reel->reel_id };
+		($self->state_dir."/reel-"
+			 .join("-",map { substr($_, 0, 16) } @pair_sha1)
+				 .".idx");
 	};
 
 has 'reel' =>
 	isa => "VCS::Git::Torrent::CommitReel",
 	is => "rw",
 	weak_ref => 1,
-	handles => [ 'git', 'plumb' ];
+	handles => [ 'git', 'plumb', "state_dir" ];
 
 has 'cat_file' =>
 	isa => 'ArrayRef',
@@ -64,8 +79,9 @@ sub open_index {
 	# define the sort function; the offset is the hash index, so we
 	# need to force numeric sorting not string compare
 	$DB_BTREE->{'compare'} = sub { $_[0] <=> $_[1] };
-	$x = tie %index, 'DB_File' => 'reel.idx',
-		O_CREAT|O_RDWR, 0666, $DB_BTREE;
+	$x = tie %index, 'DB_File' => $self->index_filename,
+		O_CREAT|O_RDWR, 0666, $DB_BTREE
+			or die $!;
 
 	$self->{db} = $x;
 
@@ -314,6 +330,8 @@ Returns the total length of the reel
 
 sub size {
 	my $self = shift;
+
+	$self->open_index unless $self->{db};
 
 	my ($key, $val);
 	if ( ! $self->{db}->seq($key, $val, R_LAST) ) {
