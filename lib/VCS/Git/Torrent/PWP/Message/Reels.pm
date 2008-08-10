@@ -54,7 +54,8 @@ sub unpack_payload {
 			(substr($payload, 0, 20),
 			 substr($payload, 20, 20));
 
-		@args = ( start => $sha1_pair[0],
+		my @args =
+			( start => $sha1_pair[0],
 			  end => $sha1_pair[1] );
 
 		my $size = unpack_num(substr($payload, 40, 4));
