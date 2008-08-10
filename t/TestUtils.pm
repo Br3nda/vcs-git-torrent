@@ -7,6 +7,13 @@ use base qw(Exporter);
 BEGIN {
 	our @EXPORT = qw(mk_tmp_repo in_empty_repo tmp_git random_port_pair);
 	$SIG{__WARN__} = sub {
+	    my $i = 0;
+	    while (my $caller = caller($i)) {
+		    if ($caller eq "Test::More") {
+			    return 0;
+		    }
+		    $i++;
+	    }
 	    my $culprit = caller;
 	    if ($culprit =~ m{Class::C3}) {
 		return 1;
