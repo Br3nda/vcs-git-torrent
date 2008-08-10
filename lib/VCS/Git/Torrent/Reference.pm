@@ -44,13 +44,17 @@ has 'torrent' =>
 	weak_ref => 1,
 	required => 1,
 	isa => "VCS::Git::Torrent",
-	handles => [ "git", "repo_hash" ];
+	handles => [ "git", "repo_hash", "plumb" ];
+
+use IO::Plumbing qw(bucket);
+use Carp;
 
 has 'tag_id' =>
 	isa => "VCS::Git::Torrent::git_object_id",
 	is => "ro",
-#	required => 1;
-	;
+	required => 1,
+	lazy => 1,
+	default => \&buildTag;
 
 has 'tagged_object' =>
 	isa => "VCS::Git::Torrent::git_object_id",
@@ -121,14 +125,24 @@ sub buildComment {
 	my $self = shift;
 	my $comment;
 
+	my $state = "header";
+
+	my @comment;
 	foreach(@{$self->_data}) {
-		if ( /^tag (.*)$/ ) {
-			$comment = $1;
-			last;
+		if ($state eq "header" and $_ eq "") {
+			$state = "body";
+		}
+		elsif ($state eq "body") {
+			if ( /^([0-9a-f]{40})\s+(.*)$/ ) {
+				$state = "refs";
+			}
+			else {
+				push @comment, $_, "\n";
+			}
 		}
 	}
 
-	$comment;
+	join "", @comment;
 }
 
 sub buildRefs {
@@ -203,18 +217,46 @@ sub buildTagger {
 	$tagger;
 }
 
-#sub buildTag {
-#	my $self = shift;
-#	my $tag_id = $self->tag_id;
-#	my $line;
-#
-#	if ( $tag_id ) {
-#	}
-#	else {
-#		# creating a references object from scratch
-#		die "no refs or tag_id given"
-#			unless $self->refs;
-#	}
-#}
+# creating a references object from scratch
+sub buildTag {
+	my $self = shift;
+	my $tag_id;
+	die if $self->{_data};
+
+#	die "no refs or tag_id given" unless ( $self->{refs} );
+
+	my $tag_generator = sub {
+		print map { $_, "\n" }
+			('object ' . $self->tagged_object,
+			 "type commit",
+			 "tag gtp-dummy",
+			 'tagger ' . $self->tagger,
+			 "",
+			);
+
+		my $comment = $self->comment;
+		print $comment;
+		if ($comment !~ m{\n\Z}) {
+			print "\n";
+		}
+
+		my $refs = $self->refs;
+		for my $ref (sort keys %$refs) {
+			print $refs->{$ref}, " ", $ref, "\n";
+		}
+	};
+
+	my $bucket = bucket;
+
+	$self->plumb
+		([ "hash-object", "-w", "-t", "tag", "--stdin" ],
+		 output => $bucket,
+		 input => IO::Plumbing::plumb(sub { $tag_generator->() }),
+		)->execute;
+
+	$tag_id = $bucket->contents;
+	chomp($tag_id);
+	$tag_id;
+}
 
 1;
