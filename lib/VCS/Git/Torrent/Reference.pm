@@ -31,10 +31,13 @@ repository reference list encapsulated in a git tag.
 
 =cut
 
+use strict;
+use warnings;
+
 use Moose;
 use VCS::Git::Torrent;
 use MooseX::Timestamp qw(timestamp);
-use MooseX::TimestampTZ qw(offset_s);
+use MooseX::TimestampTZ qw(offset_s epochtz zone);
 
 has 'torrent' =>
 	is => "rw",
@@ -64,12 +67,12 @@ has 'tagger' =>
 	default => \&buildTagger;
 
 has 'tagdate' =>
-	isa => "Str",
-#	isa => "TimestampTZ",
+#	isa => "Str",
+	isa => "TimestampTZ",
 	is => "ro",
 	required => 1,
 	lazy => 1,
-#	coerce => 1,
+	coerce => 1,
 	default => \&buildTagDate;
 
 has 'comment' =>
@@ -141,6 +144,12 @@ sub buildRefs {
 	\%refs;
 }
 
+sub tagdate_git {
+	my $self = shift;
+	my ($epoch, $offset) = epochtz $self->tagdate;
+	$epoch . " " . zone($offset);
+}
+
 sub buildTagDate {
 	my $self = shift;
 	my @data;
@@ -153,11 +162,10 @@ sub buildTagDate {
 		}
 	}
 
-		if (my ($epoch, $offset) = ($time =~ m{(\d+)\s*([+\-]\d+)})) {
-			my $offset_s = offset_s($offset);
-			$epoch += $offset;
-			$time = timestamp($epoch).$offset;
-		}
+	if (my ($epoch, $offset) = ($time =~ m{(\d+)\s*([+\-]\d+)})) {
+		my $offset_s = offset_s($offset);
+		$epoch += $offset;
+		$time = timestamp($epoch).$offset;
 	}
 
 	$time;
