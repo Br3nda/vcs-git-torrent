@@ -6,6 +6,7 @@ use warnings;
 use t::TestUtils;
 use VCS::Git::Torrent;
 use List::Util qw(first max);
+use MooseX::TimestampTZ;
 
 BEGIN { use_ok('VCS::Git::Torrent::CommitReel::Local') }
 
@@ -26,6 +27,7 @@ my $TEST_COMMIT = "5e8f6a7807a378259daa3b91314c8c9775fa160e";
 my $reference = VCS::Git::Torrent::Reference->new
 	( tagged_object => "0"x40,
 	  tagger => "R.U. Interested <whoever\@example.com>",
+	  tagdate => timestamptz,
 	  comment => "",
 	  torrent => $dummy_torrent,
 	  refs => { "refs/heads/master" => $TEST_COMMIT } );

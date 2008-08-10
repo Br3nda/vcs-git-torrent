@@ -178,8 +178,8 @@ sub buildTagDate {
 
 	if (my ($epoch, $offset) = ($time =~ m{(\d+)\s*([+\-]\d+)})) {
 		my $offset_s = offset_s($offset);
-		$epoch += $offset;
-		$time = timestamp($epoch).$offset;
+		$epoch += $offset_s;
+		$time = timestamp(gmtime $epoch).$offset;
 	}
 
 	$time;
@@ -230,7 +230,8 @@ sub buildTag {
 			('object ' . $self->tagged_object,
 			 "type commit",
 			 "tag gtp-dummy",
-			 'tagger ' . $self->tagger,
+			 'tagger ' . $self->tagger
+				 . " " . $self->tagdate_git,
 			 "",
 			);
 

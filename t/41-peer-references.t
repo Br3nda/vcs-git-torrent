@@ -28,7 +28,7 @@ my $ref = VCS::Git::Torrent::Reference->new(
 
 my $tagged_object = '5e8f6a7807a378259daa3b91314c8c9775fa160e';
 my $sam = 'Sam Vilain <sam@vilain.net>';
-my $tagdate = '2008-07-13 15:45:13+1200';
+my $tagdate = '2008-07-13 15:25:13+1200';
 
 is($ref->tag_id, $tag_id, 'tag_id matches');
 is($ref->tagged_object, $tagged_object, 'tagged_object matches');
