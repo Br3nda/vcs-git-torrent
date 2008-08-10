@@ -24,6 +24,7 @@ BEGIN {
 	# known to exist in perl 5.8.8, and not trappable via $SIG{__WARN__}
 	#local ($^W) = 0;
 	local($Coro::State::WARNHOOK) = sub { };
+	local($SIG{__WARN__}) = sub { };
 	require Coro::Socket;
 	Coro::Socket->import();
 }
