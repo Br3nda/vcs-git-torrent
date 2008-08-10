@@ -100,22 +100,28 @@ Internal functions to populate any uninitialized parameters, when possible.
 
 =cut
 
+sub _data {
+	my $self = shift;
+	if ( $self->{tag_id} ) {
+		return $self->{_data} ||= do {
+			my @data = $self->git->command
+				('cat-file', 'tag', $self->tag_id);
+			\@data;
+		};
+	}
+	else {
+		croak "missing fields on Reference";
+	}
+}
+
 sub buildComment {
 	my $self = shift;
-	my @data;
 	my $comment;
 
-	if ( $self->tag_id ) {
-		unless ( $self->{_data} ) {
-			@data = $self->git->command('cat-file', 'tag', $self->tag_id);
-			$self->{_data} = \@data;
-		}
-
-		foreach(@{$self->{_data}}) {
-			if ( /^tag (.*)$/ ) {
-				$comment = $1;
-				last;
-			}
+	foreach(@{$self->_data}) {
+		if ( /^tag (.*)$/ ) {
+			$comment = $1;
+			last;
 		}
 	}
 
@@ -124,19 +130,11 @@ sub buildComment {
 
 sub buildRefs {
 	my $self = shift;
-	my @data;
 	my %refs;
 
-	if ( $self->tag_id ) {
-		unless ( $self->{_data} ) {
-			@data = $self->git->command('cat-file', 'tag', $self->tag_id);
-			$self->{_data} = \@data;
-		}
-
-		foreach(@{$self->{_data}}) {
-			if ( /^([0-9a-f]{40})\s+(.*)$/ ) {
-				$refs{$2} = $1;
-			}
+	foreach(@{$self->_data}) {
+		if ( /^([0-9a-f]{40})\s+(.*)$/ ) {
+			$refs{$2} = $1;
 		}
 	}
 
@@ -148,18 +146,12 @@ sub buildTagDate {
 	my @data;
 	my $time;
 
-	if ( $self->tag_id ) {
-		unless ( $self->{_data} ) {
-			@data = $self->git->command('cat-file', 'tag', $self->tag_id);
-			$self->{_data} = \@data;
+	foreach(@{$self->_data}) {
+		if ( /^tagger\s+(.*)$/ ) {
+			(undef, undef, $time) = $self->git->ident($1);
+			last;
 		}
-
-		foreach(@{$self->{_data}}) {
-			if ( /^tagger\s+(.*)$/ ) {
-				(undef, undef, $time) = $self->git->ident($1);
-				last;
-			}
-		}
+	}
 
 		if (my ($epoch, $offset) = ($time =~ m{(\d+)\s*([+\-]\d+)})) {
 			my $offset_s = offset_s($offset);
@@ -176,17 +168,10 @@ sub buildTaggedObject {
 	my @data;
 	my $tobj;
 
-	if ( $self->tag_id ) {
-		unless ( $self->{_data} ) {
-			@data = $self->git->command('cat-file', 'tag', $self->tag_id);
-			$self->{_data} = \@data;
-		}
-
-		foreach(@{$self->{_data}}) {
-			if ( /^object ([0-9a-f]{40})$/ ) {
-				$tobj = $1;
-				last;
-			}
+	foreach(@{$self->_data}) {
+		if ( /^object ([0-9a-f]{40})$/ ) {
+			$tobj = $1;
+			last;
 		}
 	}
 
@@ -199,18 +184,11 @@ sub buildTagger {
 	my ($name, $email);
 	my $tagger;
 
-	if ( $self->tag_id ) {
-		unless ( $self->{_data} ) {
-			@data = $self->git->command('cat-file', 'tag', $self->tag_id);
-			$self->{_data} = \@data;
-		}
-
-		foreach(@{$self->{_data}}) {
-			if ( /^tagger\s+(.*)$/ ) {
-				($name, $email, undef) = $self->git->ident($1);
-				$tagger = "$name <$email>";
-				last;
-			}
+	foreach(@{$self->_data}) {
+		if ( /^tagger\s+(.*)$/ ) {
+			($name, $email, undef) = $self->git->ident($1);
+			$tagger = "$name <$email>";
+			last;
 		}
 	}
 
