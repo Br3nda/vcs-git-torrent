@@ -54,8 +54,15 @@ defined in section I<FIXME>.
 
 sub reel_id {
 	my $self = shift;
-	[ $self->start ? $self->start->tag_id : sha1_hex(""),
-	  $self->end->tag_id ];
+	[ $self->start
+		? ref($self->start) eq 'VCS::Git::Torrent::Reference'
+			? $self->start->tag_id
+			: $self->start
+		: sha1_hex(""),
+	  ref($self->end) eq 'VCS::Git::Torrent::Reference'
+		? $self->end->tag_id
+		: $self->end
+	];
 }
 
 1;

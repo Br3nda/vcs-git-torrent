@@ -152,7 +152,8 @@ Returns an array ref of reels known to this peer
 
 has 'reels' =>
 	isa => 'ArrayRef[VCS::Git::Torrent::CommitReel]',
-	is => "rw";
+	is => "rw",
+	default => sub { [] };
 
 has 'references' =>
 	isa => 'ArrayRef[VCS::Git::Torrent::Reference]',

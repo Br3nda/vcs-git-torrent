@@ -214,7 +214,8 @@ has 'reels' =>
 		for my $x ( @$value ) {
 			$x->torrent($self);
 		}
-	};
+	},
+	default => sub { [] };
 
 has 'trackers' =>
 	isa => "ArrayRef[URI]",

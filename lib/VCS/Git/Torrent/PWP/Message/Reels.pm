@@ -91,8 +91,21 @@ sub action {
 	my $local_peer = shift;
 	my $connection = shift;
 
-	if ( @{$self->reels} ) { # we got some reels from someone
-		$connection->remote->reels($self->reels);
+	if ( scalar(@{ $self->reels }) ) { # we got some reels from someone
+		# check for duplicates
+		my @new_reels = map {
+			my $reel = $_;
+
+			my $num = grep {
+				$reel->reel_id->[0] eq $_->reel_id->[0] &&
+				$reel->reel_id->[1] eq $_->reel_id->[1]
+			} @{ $local_peer->torrent->reels };
+
+			$num ? () : ($reel)
+		} @{ $self->reels };
+
+		push @{ $local_peer->torrent->reels }, @new_reels;
+		push @{ $connection->remote->reels }, @{ $self->reels };
 	}
 	else { # it was a request for our reels
 		$local_peer->send_message($connection->remote, GTP_PWP_REELS,
