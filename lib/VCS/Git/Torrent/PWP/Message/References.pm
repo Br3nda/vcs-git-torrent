@@ -117,13 +117,20 @@ sub action {
 			);
 		}
 
-		$connection->remote->references(\@references);
+		# add to torrent's global list of all references
+		push @{ $local_peer->torrent->references }, @references;
+		# add to this connection's local peer's list
+		push @{ $local_peer->references }, @references;
+		# add to this connection's remote peer's list
+		push @{ $connection->remote->references }, @references;
 	}
 	else { # it's a request for our references
 		$local_peer->send_message(
 			$connection->remote, GTP_PWP_REFERENCES,
 			$local_peer->torrent->references
-		) if ( @{ $local_peer->torrent->references } );
+		) if ( # make sure we have references to send
+			scalar(@{ $local_peer->torrent->references })
+		);
 	}
 }
 

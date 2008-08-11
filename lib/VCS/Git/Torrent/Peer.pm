@@ -156,7 +156,8 @@ has 'reels' =>
 
 has 'references' =>
 	isa => 'ArrayRef[VCS::Git::Torrent::Reference]',
-	is => 'rw';
+	is => 'rw',
+	default => sub { [] };
 
 1;
 

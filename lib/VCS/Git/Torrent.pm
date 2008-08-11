@@ -202,7 +202,8 @@ has 'references' =>
 		for my $x ( @$value ) {
 			$x->torrent($self);
 		}
-	};
+	},
+	default => sub { [] };
 
 has 'reels' =>
 	isa => "ArrayRef[VCS::Git::Torrent::CommitReel]",

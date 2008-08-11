@@ -66,8 +66,7 @@ my $t2 = VCS::Git::Torrent->new(
 
 my $peer_2 = VCS::Git::Torrent::Peer::Async->new(
 	port => $port_2,
-	torrent => $t,
-	#torrent => $t2,  # this should also work...
+	torrent => $t2,
 	peer_id => 'BravoPeer2BravoPeer2',
 );
 ok($peer_2, 'Another peer created');
@@ -77,19 +76,21 @@ $peer_1->connect("localhost:$port_2");
 # let the connect get processed
 Coro::Event::loop(1);
 
-my $victim = $peer_1->connections->[0]->remote;
-$peer_1->send_message($victim, GTP_PWP_REFERENCES);
+my $victim = $peer_2->connections->[0]->remote;
+$peer_2->send_message($victim, GTP_PWP_REFERENCES);
 
 Coro::Event::sweep;
 cede;
 
 Coro::Event::loop(1);
 
+is(scalar(@{ $peer_2->references }), 1, 'we received a reference from our peer');
+
 for my $attr ( qw(tag_id tagged_object tagger tagdate comment refs) ) {
 	is_deeply(
-		$victim->references->[0]->$attr,
+		$peer_2->references->[0]->$attr,
 		$ref->$attr,
 		'reconstructed Reference: ' . $attr . ' matches'
-	       );
+	);
 }
 
