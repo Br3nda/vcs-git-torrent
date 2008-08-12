@@ -16,7 +16,7 @@ has 'index' =>
 	isa => "VCS::Git::Torrent::CommitReel::Index",
 	is => "ro",
 	default => sub {
-		VCS::Git::Torrent::CommitReel::Index->new(),
+		VCS::Git::Torrent::CommitReel::Index->new()
 	};
 
 has '+size' =>
@@ -30,6 +30,7 @@ has '+size' =>
 sub BUILD {
 	my $self = shift;
 	$self->index->reel($self);
+	$self->index->update_index();
 }
 
 has '+torrent' =>

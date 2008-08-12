@@ -320,10 +320,7 @@ sub size {
 	$self->open_index unless $self->{db};
 
 	my ($key, $val);
-	if ( $self->{db}->seq($key, $val, R_LAST) ) {
-		$self->update_index;
-		$self->{db}->seq($key, $val, R_LAST);
-	}
+	$self->{db}->seq($key, $val, R_LAST);
 
 	my $last = thaw $val;
 	$last->offset + $last->size;
