@@ -91,11 +91,18 @@ sub action {
 	my $local_peer = shift;
 	my $connection = shift;
 
+	my ($start, $end) = @{ $self->reel_sha1_pair };
+
 	if ( $self->bits ) {
-		# $local_peer->send_play_reqs() ?
+		# HACK
+		for(my $i = 0; $i < $self->num_bits; $i++) {
+			$local_peer->send_message(
+				$connection->remote, GTP_PWP_PLAY,
+				$start, $end, $i
+			);
+		}
 	}
-	elsif ( $self->reel_sha1_pair ) {
-		my ($start, $end) = @{ $self->reel_sha1_pair };
+	else {
 		my $reel;
 
 		foreach( @{ $local_peer->torrent->reels } ) {

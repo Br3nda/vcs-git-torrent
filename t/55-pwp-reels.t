@@ -93,5 +93,5 @@ my $reel_2 = $peer_2->torrent->reels->[0];
 
 $peer_2->send_message($victim, GTP_PWP_BLOCKS, $reel_2);
 
-Coro::Event::loop(1);
+Coro::Event::loop(10);
 
