@@ -13,6 +13,7 @@ BEGIN {
 	use_ok('VCS::Git::Torrent::CommitReel::Local');
 	use_ok('VCS::Git::Torrent::Peer::Async');
 	use_ok('VCS::Git::Torrent::PWP', qw(:pwp_constants));
+#	use_ok('VCS::Git::Torrent::PWP::Message::Blocks');
 }
 
 # In this test, two peers connect and exchange reel (and reference)
@@ -85,8 +86,12 @@ my $victim = $peer_2->connections->[0]->remote;
 $peer_2->send_message($victim, GTP_PWP_REELS);
 
 # let our message get there, and the reply back to us
-Coro::Event::sweep;
-cede;
+Coro::Event::loop(1);
+
+is(scalar(@{$peer_2->torrent->reels}), 1, 'peer_2 received a reel');
+my $reel_2 = $peer_2->torrent->reels->[0];
+
+$peer_2->send_message($victim, GTP_PWP_BLOCKS, $reel_2);
 
 Coro::Event::loop(1);
 
