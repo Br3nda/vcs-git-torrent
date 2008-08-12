@@ -41,6 +41,11 @@ has 'size' =>
 	is => "ro",
 	required => 1;
 
+has 'commit_info' =>
+	isa => 'ArrayRef',
+	is => 'rw',
+	default => sub { [] };
+
 use Digest::SHA1 qw(sha1_hex);
 
 =head2 reel_id returns [ sha1_hex, sha1_hex ]

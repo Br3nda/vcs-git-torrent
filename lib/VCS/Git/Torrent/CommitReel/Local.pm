@@ -15,6 +15,7 @@ extends 'VCS::Git::Torrent::CommitReel';
 has 'index' =>
 	isa => "VCS::Git::Torrent::CommitReel::Index",
 	is => "ro",
+	handles => [ 'commit_info' ],
 	default => sub {
 		VCS::Git::Torrent::CommitReel::Index->new()
 	};

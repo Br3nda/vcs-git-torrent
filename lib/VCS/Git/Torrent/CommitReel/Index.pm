@@ -62,6 +62,10 @@ has 'cat_file_info' =>
 		[ $rdr->in_fh, $wtr->out_fh, $plumb ];
 	};
 
+has 'commit_info' =>
+	isa => 'ArrayRef',
+	is => 'rw';
+
 =head2 open_index
 
 Open, and possibly create, the file that stores the commit reel index.
@@ -100,7 +104,24 @@ sub update_index {
 	my $self = shift;
 	my $iter = $self->reel_revlist_iter;
 
-	1 while $iter->();
+	my $inter_commit_size = 0;
+
+	$self->commit_info([]);
+
+	while ( my $rev = $iter->() ) {
+		$inter_commit_size += $rev->size;
+
+		if ( $rev->type eq 'commit' ) {
+			push @{ $self->commit_info }, {
+				in_repo => 1,
+				offset => $rev->offset,
+				objectid => $rev->objectid,
+				size => $inter_commit_size,
+			};
+
+			$inter_commit_size = 0;
+		}
+	}
 }
 
 =head2 reel_revlist_iter() returns VCS::Git::Torrent::CommitReel::Entry

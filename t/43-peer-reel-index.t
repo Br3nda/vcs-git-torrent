@@ -202,3 +202,5 @@ while ( <$all> ) {
 is($missing, 0, "no objects were missing")
 	or diag("first missing: $first");
 
+is(scalar(@{$reel->commit_info}), 28, 'reel has correct number of commits');
+
