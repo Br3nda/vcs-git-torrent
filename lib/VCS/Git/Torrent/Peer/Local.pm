@@ -57,7 +57,7 @@ Do we have an address?
 
 sub has_address {
 	my $self = shift;
-	!!$self->address;
+	defined $self->address
 }
 
 =head2 has_port
@@ -68,15 +68,7 @@ Do we have a port?
 
 sub has_port {
 	my $self = shift;
-	!!$self->port;
-}
-
-# initialize the peer
-sub BUILD {
-	my $self = shift;
-	croak "need a peername or listen address"
-		unless ($self->port or
-			$self->peername && $self->peerport);
+	defined $self->port
 }
 
 has 'torrent' =>

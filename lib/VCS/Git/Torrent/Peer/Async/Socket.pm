@@ -17,6 +17,7 @@ use Moose::Role;
 with 'VCS::Git::Torrent::Peer::Async::State';
 
 use Coro::RWLock;
+use Socket;
 
 BEGIN {
 	# clean import workaround for bug:
@@ -39,11 +40,26 @@ has 'socket' =>
 		confess "something tried to grab my socket too soon"
 			unless Coro::current == $self->coro;
 		$self->trace(sub{"creating socket - @{[$self->socket_args]}"});
-		new Coro::Socket
+
+		my %args = $self->socket_args();
+		$args{'LocalHost'} = '0.0.0.0' if (
+			defined $args{'LocalPort'} &&
+			$args{'LocalPort'} == 0    &&
+			not defined $args{'LocalHost'}
+		);
+
+		my $sock = new Coro::Socket
 			( ( defined($self->timeout)
 			    ? ( Timeout => $self->timeout )
 			    : () ),
-			  $self->socket_args );
+			  %args );
+
+		if ( defined $args{'LocalPort'} && $args{'LocalPort'} == 0) {
+			my $port = (sockaddr_in($sock->sockname()))[0];
+			$self->port($port);
+		}
+
+		$sock
 	};
 
 requires 'socket_args';

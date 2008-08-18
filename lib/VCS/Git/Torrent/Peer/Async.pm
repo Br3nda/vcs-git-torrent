@@ -104,7 +104,7 @@ sub socket_args {
 	( ( $self->has_address
 	    ? (LocalAddr => $self->address)
 	    : () ),
-	  LocalPort => $self->port,
+	  LocalPort => $self->port || 0,
 	  Proto     => "tcp",
 	  Listen    => 5,
 	  ( $self->timeout
