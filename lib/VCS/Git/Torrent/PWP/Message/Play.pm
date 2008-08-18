@@ -113,6 +113,13 @@ sub action {
 
 		$unpack->execute();
 		$unpack->wait();
+
+		my $pack_name = $local_peer->torrent->state_dir .
+			'/commit-' . $self->offset . '.pack';
+		open(PACK, '>', $pack_name)
+			|| die 'failed to save pack file';
+		syswrite PACK, $self->data, $self->data_len;
+		close(PACK);
 	}
 	else { # it was a request for data
 		my $reel;
@@ -132,11 +139,18 @@ sub action {
 			my $pack;
 			my $pack_name = $local_peer->torrent->state_dir .
 				'/commit-' . $commit->{'objectid'} . '.pack';
+			my $alt_pack_name = $local_peer->torrent->state_dir .
+				'/commit-' . $self->offset . '.pack';
 
 			if ( -e $pack_name ) {
 				open(PACK, '<', $pack_name)
 					|| die 'failed to open pack file';
 				read PACK, $pack, -s $pack_name;
+				close(PACK);
+			} elsif ( -e $alt_pack_name ) {
+				open(PACK, '<', $alt_pack_name)
+					|| die 'failed to open pack file';
+				read PACK, $pack, -s $alt_pack_name;
 				close(PACK);
 			} else {
 				my @parents = (
