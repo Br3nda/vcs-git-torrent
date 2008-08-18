@@ -128,15 +128,15 @@ sub action {
 
 		if ( $reel ) {
 			my $commit = $reel->commit_info->[$self->offset];
-			my $prev_commit = (
-				  $self->offset
-				? $reel->commit_info->[$self->offset - 1]
+			my @parents = (
+				  $commit->{'parents'} &&
+				  scalar(@{ $commit->{'parents'} })
+				? map { '^' . $_ } @{ $commit->{'parents'} }
 				: undef
 			);
 
 			my @cmd = ( 'rev-list', '--objects-edge' );
-			push @cmd, ( '^' . $prev_commit->{'objectid'} )
-				if ( $prev_commit );
+			push @cmd, @parents if ( @parents );
 			push @cmd, ( $commit->{'objectid'} );
 
 			my $rev_list = $local_peer->torrent->plumb(

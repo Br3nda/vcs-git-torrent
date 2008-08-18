@@ -117,6 +117,7 @@ sub update_index {
 				offset => $rev->offset,
 				objectid => $rev->objectid,
 				size => $inter_commit_size,
+				parents => $rev->parents,
 			};
 
 			$inter_commit_size = 0;
@@ -214,6 +215,7 @@ sub reel_revlist_iter {
 	};
 
 	my @objects;
+	my @parents;
 	my $offset = 0;
 	my $git = $self->git;
 	my $object_iter = sub {
@@ -222,6 +224,7 @@ sub reel_revlist_iter {
 				or return;
 
 			my $id = $next_commit->{commitid};
+			@parents = keys(%{$next_commit->{parents}});
 
 			@objects = grep { !$seen{$_->[0]}++ }
 				$self->_commit_objects($id);
@@ -229,7 +232,7 @@ sub reel_revlist_iter {
 
 		my $x = shift @objects;
 
-		my $rev = VCS::Git::Torrent::CommitReel::Entry->new(
+		my %args = (
 			offset   => $offset,
 			type     => $x->[2],
 			size     => $x->[1],
@@ -237,6 +240,12 @@ sub reel_revlist_iter {
 			($x->[3] ?
 			 ( path  => $x->[3] ) : ()),
 		);
+
+		if ( $x->[2] eq 'commit' ) {
+			$args{'parents'} = [ @parents ];
+		}
+
+		my $rev = VCS::Git::Torrent::CommitReel::Entry->new(%args);
 
 		$offset += $rev->size;
 

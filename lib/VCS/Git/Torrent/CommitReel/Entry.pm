@@ -30,6 +30,8 @@ An Entry consists of the following:
 
 =item path (for debugging)
 
+=item parents (for commit objects)
+
 =back
 
 =cut
@@ -55,6 +57,10 @@ has 'objectid' =>
 
 has 'path' => # for debugging
 	isa => 'Str',
+	is  => 'ro';
+
+has 'parents' =>
+	isa => 'ArrayRef[VCS::Git::SHA1]',
 	is  => 'ro';
 
 1;
