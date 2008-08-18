@@ -128,28 +128,47 @@ sub action {
 
 		if ( $reel ) {
 			my $commit = $reel->commit_info->[$self->offset];
-			my @parents = (
-				  $commit->{'parents'} &&
-				  scalar(@{ $commit->{'parents'} })
-				? map { '^' . $_ } @{ $commit->{'parents'} }
-				: undef
-			);
 
-			my @cmd = ( 'rev-list', '--objects-edge' );
-			push @cmd, @parents if ( @parents );
-			push @cmd, ( $commit->{'objectid'} );
+			my $pack;
+			my $pack_name = $local_peer->torrent->state_dir .
+				'/commit-' . $commit->{'objectid'} . '.pack';
 
-			my $rev_list = $local_peer->torrent->plumb(
-				\@cmd,
-				stderr => vent(),
-			);
+			if ( -e $pack_name ) {
+				open(PACK, '<', $pack_name)
+					|| die 'failed to open pack file';
+				read PACK, $pack, -s $pack_name;
+				close(PACK);
+			} else {
+				my @parents = (
+					  $commit->{'parents'} &&
+					  scalar(@{ $commit->{'parents'} })
+					? map {
+						'^' . $_
+					  } @{ $commit->{'parents'} }
+					: undef
+				);
 
-			$rev_list->output($local_peer->torrent->plumb(
-				[ 'pack-objects', '--stdout' ],
-				stderr => vent(),
-			));
+				my @cmd = ( 'rev-list', '--objects-edge' );
+				push @cmd, @parents if ( @parents );
+				push @cmd, ( $commit->{'objectid'} );
 
-			my $pack = $rev_list->terminus->contents;
+				my $rev_list = $local_peer->torrent->plumb(
+					\@cmd,
+					stderr => vent(),
+				);
+
+				$rev_list->output($local_peer->torrent->plumb(
+					[ 'pack-objects', '--stdout' ],
+					stderr => vent(),
+				));
+
+				$pack = $rev_list->terminus->contents;
+
+				open(PACK, '>', $pack_name)
+					|| die 'failed to save pack data';
+				syswrite PACK, $pack;
+				close(PACK);
+			}
 
 			$local_peer->send_message(
 				$connection->remote, GTP_PWP_PLAY,
