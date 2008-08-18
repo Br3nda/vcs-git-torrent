@@ -186,7 +186,7 @@ has 'repo_hash' =>
 	lazy => 1,
 	default => sub {
 		my $self = shift;
-		my $repo_hash = $self->repo->marshall;
+		my $repo_hash = $self->marshall;
 		sha1_hex(bencode($repo_hash));
 	};
 
@@ -256,12 +256,13 @@ sub marshall {
 	for my $key ( qw(comment created_by creation_date
 			 repo references trackers) ) {
 		if ( my $val = $self->$key ) {
-			$key =~ s{_}{ };
+			my $nkey = $key;
+			$nkey =~ s{_}{ };
 			if ( blessed $val and
 			     $val->can("marshall") ) {
 				$val = $val->marshall;
 			}
-			$marshalled{$key} = $val;
+			$marshalled{$nkey} = $val;
 		}
 	}
 	\%marshalled;
