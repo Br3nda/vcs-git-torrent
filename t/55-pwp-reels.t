@@ -93,5 +93,8 @@ my $reel_2 = $peer_2->torrent->reels->[0];
 
 $peer_2->send_message($victim, GTP_PWP_BLOCKS, $reel_2);
 
-Coro::Event::loop(10);
+Coro::Event::loop(1);
+
+my $bits = @{ $peer_2->connections->[0]->remote->reels->[0]->commit_info };
+is($bits, 71, 'received 71 commit bits');
 

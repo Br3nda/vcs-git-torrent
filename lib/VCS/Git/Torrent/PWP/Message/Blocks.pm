@@ -94,12 +94,27 @@ sub action {
 	my ($start, $end) = @{ $self->reel_sha1_pair };
 
 	if ( $self->bits ) {
-		# HACK
-		for(my $i = 0; $i < $self->num_bits; $i++) {
-			$local_peer->send_message(
-				$connection->remote, GTP_PWP_PLAY,
-				$start, $end, $i
+		my $reel;
+
+		foreach( @{ $connection->remote->reels } ) {
+			$reel = $_;
+
+			last if (
+				$reel->reel_id->[0] eq $start &&
+				$reel->reel_id->[1] eq $end
 			);
+		}
+
+		if ( $reel ) {
+			my @commit_info = ();
+
+			for(my $i = 0; $i < $self->num_bits; $i++) {
+				push @commit_info, {
+					in_repo => vec($self->bits, $i, 1),
+				};
+			}
+
+			$reel->commit_info(\@commit_info);
 		}
 	}
 	else {
