@@ -106,6 +106,13 @@ sub action {
 
 		push @{ $local_peer->torrent->reels }, @new_reels;
 		push @{ $connection->remote->reels }, @{ $self->reels };
+
+		for my $reel ( @{ $self->reels } ) {
+			$local_peer->send_message(
+				$connection->remote, GTP_PWP_BLOCKS,
+				$reel
+			);
+		}
 	}
 	else { # it was a request for our reels
 		$local_peer->send_message($connection->remote, GTP_PWP_REELS,

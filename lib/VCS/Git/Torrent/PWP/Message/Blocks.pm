@@ -112,6 +112,12 @@ sub action {
 				push @commit_info, {
 					in_repo => vec($self->bits, $i, 1),
 				};
+
+				# HACK
+				$local_peer->send_message(
+					$connection->remote, GTP_PWP_PLAY,
+					$start, $end, $i
+				);
 			}
 
 			$reel->commit_info(\@commit_info);

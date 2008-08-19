@@ -98,7 +98,7 @@ sub action {
 
 		foreach(@{$temp_refs}) {
 			my ($ref_sha1, $ref_size, $ref_blob) = @{ $_ };
-
+print STDERR "References action: write tag $ref_sha1\n";
 			my $plumb = $local_peer->torrent->plumb
 			    ( [ "hash-object", 
 				'-w', '--stdin', '-t', 'tag' ],

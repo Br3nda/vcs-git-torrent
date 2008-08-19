@@ -117,6 +117,9 @@ sub loop {
 	my $self = shift;
 	my $socket = $self->socket;
 
+	$self->local->send_message($self->remote, GTP_PWP_REELS);
+	$self->local->send_message($self->remote, GTP_PWP_REFERENCES);
+
 	$self->trace(sub {"main loop"});
 	while ( my $message = do {
 		$self->recv_lock->wrlock;
