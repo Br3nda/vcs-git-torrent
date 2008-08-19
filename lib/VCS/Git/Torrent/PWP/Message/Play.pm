@@ -12,7 +12,7 @@ L<http://gittorrent.utsl.gen.nz/rfc.html#pwp-play>
 
 =cut
 
-use IO::Plumbing qw(bucket vent);
+use IO::Plumbing qw(hose vent);
 use Moose;
 with "VCS::Git::Torrent::PWP::Message";
 use Carp;
@@ -103,15 +103,17 @@ sub action {
 	my ($start, $end) = @{ $self->reel_sha1_pair };
 
 	if ( $self->data_len && $self->data ) { # we got data
-		my $bucket = bucket($self->data);
+		my $hose = hose();
 
 		my $unpack = $local_peer->torrent->plumb(
-			[ 'unpack-objects' ],
-			input => $bucket,
-			stderr => vent(),
+			[ 'unpack-objects', '-q' ],
+			input => $hose,
+#			stderr => vent(),
 		);
 
 		$unpack->execute();
+		$hose->print($self->data);
+		$hose->close();
 		$unpack->wait();
 
 		my $pack_name = $local_peer->torrent->state_dir .
@@ -168,12 +170,12 @@ sub action {
 
 				my $rev_list = $local_peer->torrent->plumb(
 					\@cmd,
-					stderr => vent(),
+#					stderr => vent(),
 				);
 
 				$rev_list->output($local_peer->torrent->plumb(
-					[ 'pack-objects', '--stdout' ],
-					stderr => vent(),
+					[ 'pack-objects', '--stdout', '-q' ],
+#					stderr => vent(),
 				));
 
 				$pack = $rev_list->terminus->contents;
