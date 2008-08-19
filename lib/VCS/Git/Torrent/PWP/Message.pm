@@ -125,6 +125,15 @@ requires 'unpack_payload';
 
 requires 'args';
 
+my %LOADED;
+
+sub _require {
+	my $class = shift;
+	$class =~ s{::}{/}g;
+	$class .= ".pm";
+	require $class unless exists $INC{$class};
+}
+
 =head2 create_io($io)
 
 Read a PWP message from $io.
@@ -153,13 +162,15 @@ sub create_io {
 		die "Expected ".$_length." bytes, got ".$bytes_read;
 	}
 
+	_require $class
+		unless $LOADED{$class}++;
+
 	$class->new( length => $_length,
 		     payload => $payload );
 }
 
 requires 'action';
 
-my %LOADED;
 no warnings 'redefine';
 
 =head2 class_for($type)
@@ -180,13 +191,6 @@ sub class_for {
 Create a PWP message to send over the network.
 
 =cut
-
-sub _require {
-	my $class = shift;
-	$class =~ s{::}{/}g;
-	$class .= ".pm";
-	require $class unless exists $INC{$class};
-}
 
 sub create {
 	my $class = (shift)->class_for(shift);
