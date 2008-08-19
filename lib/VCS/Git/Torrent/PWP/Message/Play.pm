@@ -159,7 +159,7 @@ sub action {
 					? map {
 						'^' . $_
 					  } @{ $commit->{'parents'} }
-					: undef
+					: ()
 				);
 
 				my @cmd = ( 'rev-list', '--objects-edge' );
