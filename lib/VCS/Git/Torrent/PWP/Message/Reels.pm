@@ -110,6 +110,8 @@ sub action {
 	else { # it was a request for our reels
 		$local_peer->send_message($connection->remote, GTP_PWP_REELS,
 			$local_peer->torrent->reels
+		) if ( # make sure we have reels to send
+			scalar(@{ $local_peer->torrent->reels })
 		);
 	}
 }
