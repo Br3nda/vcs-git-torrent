@@ -122,6 +122,34 @@ sub action {
 			|| die 'failed to save pack file';
 		syswrite PACK, $self->data, $self->data_len;
 		close(PACK);
+
+		my $reel;
+
+		foreach( @{ $local_peer->torrent->reels } ) {
+			$reel = $_;
+
+			last if (
+				$reel->reel_id->[0] eq $start &&
+				$reel->reel_id->[1] eq $end
+			);
+		}
+
+		if ( $reel && $ENV{'PLAY_STATUS'} ) {
+			print STDERR "\rreceived commit " .
+				( $self->offset + 1 ) .
+					"/" .
+				@{ $reel->commit_info } .
+
+				' (' .
+				int( 100 * ( $self->offset + 1 ) /
+					@{ $reel->commit_info } ) .
+				") ";
+
+			print STDERR "\n" if (
+				( $self->offset + 1 ) ==
+				@{ $reel->commit_info }
+			);
+		}
 	}
 	else { # it was a request for data
 		my $reel;
