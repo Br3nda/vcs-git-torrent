@@ -33,8 +33,8 @@ use File::Temp qw(tempdir);
 
 sub mk_tmp_repo {
 	my $temp_dir = tempdir( "t/tmpXXXXX", CLEANUP => 1 );
-	system("cd $temp_dir; git-init >/dev/null 2>&1") == 0
-		or die "git-init failed; rc=$?";
+	system("cd $temp_dir; git init >/dev/null") == 0
+		or die "git init failed; rc=$?";
 	fast_abs_path($temp_dir);
 }
 
