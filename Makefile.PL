@@ -14,6 +14,7 @@ requires        ("Moose" => 0.32);
 requires        ("Sub::Exporter");
 requires        ("MooseX::Timestamp" => 0.05);
 requires	("IO::Plumbing" => 0.06);
+requires	("Digest::SHA1");
 
 eval "use Git";
 my $git_ok = 1;
